@@ -132,10 +132,30 @@ main.has-focus>section.is-focused {
     transform: scale(1);
 }
 
-/* --- [ĐÃ SỬA] Language Switching --- */
+/* --- [ĐÃ SỬA] Language Switching (Final Fix) --- */
+/* 1. Ẩn ngôn ngữ không hoạt động */
 [lang="en"] [data-lang="vi"],
 [lang="vi"] [data-lang="en"] {
     display: none !important;
+}
+
+/* 2. Đảm bảo ngôn ngữ hoạt động được hiển thị rõ ràng với display phù hợp */
+/* Cho các phần tử cấp khối (block-level) */
+[lang="vi"] h1[data-lang="vi"],
+[lang="vi"] h2[data-lang="vi"],
+[lang="vi"] h3[data-lang="vi"],
+[lang="vi"] h4[data-lang="vi"],
+[lang="vi"] h5[data-lang="vi"],
+[lang="vi"] p[data-lang="vi"],
+[lang="vi"] li[data-lang="vi"] {
+    display: block !important;
+}
+
+/* Cho các phần tử nội tuyến (inline/inline-block) */
+[lang="vi"] a[data-lang="vi"],
+[lang="vi"] span[data-lang="vi"],
+[lang="vi"] strong[data-lang="vi"] {
+    display: initial !important;
 }
 
 #progress-bar {
@@ -642,6 +662,41 @@ h2.title-reveal span {
     color: var(--bg-color);
 }
 
+/* --- New Neon Title Effect (Replaced Glitch) --- */
+.neon-title {
+    font-weight: 700;
+    /* Base text color */
+    color: #fff; 
+    text-shadow:
+        0 0 7px #fff,          /* Inner white glow */
+        0 0 10px #fff,
+        0 0 21px var(--accent-color), /* Accent color glow */
+        0 0 42px var(--accent-color),
+        0 0 82px var(--accent-color);
+    animation: neon-flicker 1.5s ease-in-out infinite alternate;
+}
+
+@keyframes neon-flicker {
+    0%, 100% {
+        opacity: 1;
+        text-shadow:
+            0 0 7px #fff,
+            0 0 10px #fff,
+            0 0 21px var(--accent-color),
+            0 0 42px var(--accent-color),
+            0 0 82px var(--accent-color);
+    }
+    50% {
+        opacity: 0.95;
+        text-shadow:
+            0 0 5px #fff,
+            0 0 8px #fff,
+            0 0 15px var(--accent-color),
+            0 0 30px var(--accent-color),
+            0 0 60px var(--accent-color);
+    }
+}
+
 @keyframes rainbow-text {
     0% {
         --accent-color: #00aaff;
@@ -808,67 +863,6 @@ footer .border-top {
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: 0.5rem;
-}
-
-/* --- Neon Floating Effect --- */
-.glitch {
-    position: relative;
-    font-weight: 700;
-    color: #fff;
-    text-shadow:
-        0 0 5px #fff,
-        0 0 10px #fff,
-        0 0 20px var(--accent-color),
-        0 0 30px var(--accent-color),
-        0 0 40px var(--accent-color);
-    animation: float 5s ease-in-out infinite;
-}
-
-.glitch::before,
-.glitch::after {
-    content: attr(data-text);
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    z-index: -1;
-}
-
-.glitch::before {
-    text-shadow: 0 0 10px #f0f, 0 0 20px #f0f; /* Magenta */
-    animation: flicker-1 4s ease-in-out infinite;
-}
-
-.glitch::after {
-    text-shadow: 0 0 10px #0ff, 0 0 20px #0ff; /* Cyan */
-    animation: flicker-2 6s ease-in-out infinite;
-}
-
-
-@keyframes float {
-    0%, 100% {
-        transform: translateY(0px);
-    }
-    50% {
-        transform: translateY(-8px);
-    }
-}
-
-@keyframes flicker-1 {
-  0%, 100% { opacity: 1; }
-  20% { opacity: 0.5; }
-  40% { opacity: 1; }
-  60% { opacity: 0.3; }
-  80% { opacity: 0.8; }
-}
-
-@keyframes flicker-2 {
-  0%, 100% { opacity: 1; }
-  15% { opacity: 0.4; }
-  30% { opacity: 1; }
-  55% { opacity: 0.2; }
-  75% { opacity: 0.9; }
 }
 
 /* --- Disable Custom Cursor on Touch Devices --- */
