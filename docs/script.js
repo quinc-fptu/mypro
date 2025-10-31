@@ -177,7 +177,7 @@ document.addEventListener("DOMContentLoaded", () => {
   if (terminalWindow && terminalOutput && terminalInput) {
     const linkCommands = {
       linkedin: "https://www.linkedin.com/in/nguyen-cao-qui/",
-      github: "https://github.com/quincce190986",
+      github: "https://github.com/quinc-fptu",
       gitlab: "https://gitlab.com/quinc.ce190986",
       facebook: "https://facebook.com/imcqsngx/",
     };
