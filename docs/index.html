@@ -1,0 +1,302 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nguyễn Cao Qui - Intern Web Developer</title>
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="progress-bar"></div>
+    <div id="mouse-glow"></div>
+
+    <header>
+        <nav class="navbar navbar-expand-lg fixed-top navbar-glass" id="main-nav">
+            <div class="container">
+                <a class="navbar-brand logo" href="#hero">Profile</a>
+                
+                <div class="lang-switcher d-lg-none">
+                    <span>ENG</span>
+                    <label class="switch-pro">
+                        <input type="checkbox" id="lang-toggle-mobile">
+                        <span class="slider-pro"></span>
+                    </label>
+                    <span>VIE</span>
+                </div>
+
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                
+                <div class="collapse navbar-collapse" id="navbarNav">
+                    <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a class="nav-link" href="#hero" data-lang="en">Home</a>
+                            <a class="nav-link" href="#hero" data-lang="vi">Trang chủ</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#about" data-lang="en">About</a>
+                            <a class="nav-link" href="#about" data-lang="vi">Giới thiệu</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#projects" data-lang="en">Projects</a>
+                            <a class="nav-link" href="#projects" data-lang="vi">Dự án</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#skills" data-lang="en">Skills</a>
+                            <a class="nav-link" href="#skills" data-lang="vi">Kỹ năng</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#contact" data-lang="en">Contact</a>
+                            <a class="nav-link" href="#contact" data-lang="vi">Liên hệ</a>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="lang-switcher d-none d-lg-flex">
+                    <span>ENG</span>
+                    <label class="switch-pro">
+                        <input type="checkbox" id="lang-toggle-desktop">
+                        <span class="slider-pro"></span>
+                    </label>
+                    <span>VIE</span>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <main>
+        <section id="hero" class="d-flex align-items-center justify-content-center text-center">
+            <div class="container-fluid hero-content"> 
+                <h1 data-lang="en">NGUYEN CAO QUI</h1>
+                <h1 data-lang="vi">NGUYỄN CAO QUÍ</h1>
+                <p class="mb-4">
+                    <span data-lang="en">I am an </span>
+                    <span data-lang="vi">Tôi là </span>
+                    <span id="typing-effect"></span>
+                </p>
+                <div class="hero-links">
+                    <a href="https://www.linkedin.com/in/nguyen-cao-qui/" target="_blank" class="btn">[LinkedIn]</a>
+                    <a href="https://github.com/quincce190986" target="_blank" class="btn">[GitHub]</a>
+                    <a href="https://gitlab.com/quinc.ce190986" target="_blank" class="btn">[GitLab]</a>
+                    <a href="https://www.facebook.com/imcqsngx/" target="_blank" class="btn">[Facebook]</a>
+                </div>
+
+                <p class="hero-subtext">
+                    <span data-lang="en">Navigate: GUI or CLI?</span>
+                    <span data-lang="vi">Điều hướng: GUI hay CLI?</span>
+                </p>
+                <div class="terminal-frame">
+                    <div class="terminal-header">
+                        <div class="terminal-buttons">
+                            <span class="t-btn btn-red"></span>
+                            <span class="t-btn btn-yellow"></span>
+                            <span class="t-btn btn-green"></span>
+                        </div>
+                        <div class="terminal-title">QuiNC@portfolio</div>
+                    </div>
+                    <div id="terminal-window">
+                        <div id="terminal-output"></div>
+                        <div id="terminal-input-line">
+                            <span id="terminal-prompt">~$</span>
+                            <input type="text" id="terminal-input" autocomplete="off" autofocus>
+                        </div>
+                    </div>
+                </div>
+                </div>
+        </section>
+
+        <section id="about" class="reveal">
+            <div class="container">
+                <h2 class="text-center mb-5 title-reveal">
+                    <span data-lang="en">About Me</span>
+                    <span data-lang="vi">Giới thiệu</span>
+                </h2>
+                <div class="row g-5 align-items-center">
+                    <div class="col-lg-8 summary">
+                        <h3 data-lang="en">Summary</h3>
+                        <h3 data-lang="vi">Tóm tắt</h3>
+                        <p data-lang="en">Motivated and disciplined Intern Candidate with a strong foundation in Object-Oriented Programming (OOP) and Data Structures and Algorithm (DSA).</p>
+                        <p data-lang="vi">Ứng viên Thực tập sinh có động lực và kỷ luật với nền tảng vững chắc về Lập trình hướng đối tượng (OOP) và Cấu trúc dữ liệu & Thuật toán (DSA).</p>
+                        <p data-lang="en">Current GPA is <strong>8.2/10</strong> from FPT University. Experienced in basic Web Back-end development using Java Servlets/JSP and SQL Server.</p>
+                        <p data-lang="vi">GPA hiện tại là <strong>8.2/10</strong> tại Đại học FPT. Đã có kinh nghiệm phát triển Web Back-end cơ bản sử dụng Java Servlets/JSP và SQL Server.</p>
+                        <p data-lang="en">Eager to leverage these foundational skills, commit to a quick transition, and specialize in <strong>C# and ASP.NET Core</strong> within a professional OJT environment.</p>
+                        <p data-lang="vi">Mong muốn vận dụng những kỹ năng nền tảng này, cam kết chuyển đổi nhanh chóng và chuyên sâu về <strong>C# và ASP.NET Core</strong> trong môi trường OJT chuyên nghiệp.</p>
+                    </div>
+                    <div class="col-lg-4">
+                        <div class="extracurricular p-4 rounded-3">
+                            <h3 data-lang="en">Extracurricular</h3>
+                            <h3 data-lang="vi">Ngoài lề</h3>
+                            <p data-lang="en"><strong>Vovinam Practices:</strong>: Achieved medals in City-level, and FPT Education Block Vovinam competitions.</p>
+                            <p data-lang="vi"><strong>Tập luyện Vovinam</strong>: Đạt huy chương tại các giải Vovinam cấp Thành phố và Khối Giáo dục FPT.</p>
+                            <p data-lang="en" class="mb-0">Demonstrates high Discipline, Perseverance, and the ability to handle high-pressure situations.</p>
+                            <p data-lang="vi" class="mb-0">Thể hiện tính <strong>Kỷ luật cao, Kiên trì</strong> và khả năng xử lý các tình huống áp lực cao.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="projects" class="reveal">
+            <div class="container">
+                <h2 class="text-center mb-5 title-reveal">
+                    <span data-lang="en">Featured Projects</span>
+                    <span data-lang="vi">Dự án Nổi bật</span>
+                </h2>
+                <div class="row g-4">
+                    <div class="col-lg-6">
+                        <div class="card h-100 project-card">
+                            <div class="card-body p-4">
+                                <span class="project-date">09/2025 - 11/2025</span>
+                                <h3 class="card-title" data-lang="en">Book & Stationery Store Management (EduMart)</h3>
+                                <h3 class="card-title" data-lang="vi">Quản lý Cửa hàng Sách & VPP (EduMart)</h3>
+                                <p class="card-text text-body-secondary" data-lang="en">FPT University - Academic Project.</p>
+                                <p class="card-text text-body-secondary" data-lang="vi">Dự án học thuật tại Đại học FPT.</p>
+                                <ul class="mt-3">
+                                    <li data-lang="en">Developed core Inventory Management modules (CRUD) using Java Servlets.</li>
+                                    <li data-lang="vi">Phát triển mô-đun Quản lý Hàng tồn kho (CRUD) bằng Java Servlets.</li>
+                                    <li data-lang="en">Implemented User Authentication and Authorization (Admin/Staff/Customer roles).</li>
+                                    <li data-lang="vi">Thực hiện Xác thực và Phân quyền người dùng (Admin/Staff/Customer).</li>
+                                    <li data-lang="en">Designed the SQL Server Database schema (Products, Inventory, Orders, Users).</li>
+                                    <li data-lang="vi">Thiết kế lược đồ Database SQL Server (Products, Inventory, Orders, Users).</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="col-lg-6">
+                        <div class="card h-100 project-card">
+                            <div class="card-body p-4">
+                                <span class="project-date">05/2025 - 07/2025</span>
+                                <h3 class="card-title" data-lang="en">Basic Library Management System</h3>
+                                <h3 class="card-title" data-lang="vi">Hệ thống Quản lý Thư viện Cơ bản</h3>
+                                <p class="card-text text-body-secondary" data-lang="en">FPT University - Academic Project.</p>
+                                <p class="card-text text-body-secondary" data-lang="vi">Dự án học thuật tại Đại học FPT.</p>
+                                <ul class="mt-3">
+                                    <li data-lang="en">Developed core CRUD modules (books, users) using Java Servlets.</li>
+                                    <li data-lang="vi">Phát triển các mô-đun CRUD cốt lõi (quản lý sách, người dùng) bằng Java Servlets.</li>
+                                    <li data-lang="en">Designed and managed the SQL Server database.</li>
+                                    <li data-lang="vi">Thiết kế và quản lý database SQL Server.</li>
+                                    <li data-lang="en">Built the dynamic user interface using JSP, HTML, and CSS.</li>
+                                    <li data-lang="vi">Xây dựng giao diện người dùng động bằng JSP, HTML, và CSS.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="skills" class="reveal">
+            <div class="container">
+                <h2 class="text-center mb-5 title-reveal">
+                    <span data-lang="en">Skills & Education</span>
+                    <span data-lang="vi">Kỹ năng & Học vấn</span>
+                </h2>
+                <div class="row g-5">
+                    <div class="col-lg-6 skills-column">
+                        <h3 data-lang="en">Skills</h3>
+                        <h3 data-lang="vi">Kỹ năng</h3>
+                        <div class="skill-category mb-4">
+                            <strong data-lang="en">Strong Foundation:</strong>
+                            <strong data-lang="vi">Nền tảng vững chắc:</strong>
+                            <span class="skill-tag">OOP (Java)</span>
+                            <span class="skill-tag">DSA</span>
+                            <span class="skill-tag">SQL</span>
+                            <span class="skill-tag">SQL Server</span>
+                        </div>
+                        <div class="skill-category mb-4">
+                            <strong data-lang="en">Front-end (Basic):</strong>
+                            <strong data-lang="vi">Front-end (Cơ bản):</strong>
+                            <span class="skill-tag">HTML</span>
+                            <span class="skill-tag">CSS</span>
+                            <span class="skill-tag">JavaScript</span>
+                        </div>
+                        <div class="skill-category mb-4">
+                            <strong data-lang="en">Back-end (Java):</strong>
+                            <strong data-lang="vi">Back-end (Java):</strong>
+                            <span class="skill-tag">Java Servlets</span>
+                            <span class="skill-tag">JSP</span>
+                        </div>
+                        <div class="skill-category mb-4">
+                            <strong data-lang="en">Tools & Others:</strong>
+                            <strong data-lang="vi">Công cụ & Khác:</strong>
+                            <span class="skill-tag">Git</span>
+                            <span class="skill-tag">C</span>
+                        </div>
+                        <div class="skill-category">
+                            <strong data-lang="en">Learning Targets (.NET):</strong>
+                            <strong data-lang="vi">Mục tiêu học tập (.NET):</strong>
+                            <span class="skill-tag">C#</span>
+                            <span class="skill-tag">ASP.NET Core</span>
+                            <span class="skill-tag">MVC</span>
+                        </div>
+                </div>
+                    <div class="col-lg-6 education-column">
+                        <h3 data-lang="en">Education</h3>
+                        <h3 data-lang="vi">Học vấn</h3>
+                        <div class="card bg-transparent-card mb-4">
+                            <div class="card-body">
+                                <h4 class="education-title" data-lang="en">Software Engineering</h4>
+                                <h4 class="education-title" data-lang="vi">Kỹ thuật phần mềm</h4>
+                                <p class.text-body-secondary mb-1"><strong>FPT University Can Tho</strong></p>
+                                <p class.text-body-secondary mb-1" data-lang="en">2023 - Present</p>
+                                <p class.text-body-secondary mb-1" data-lang="vi">2023 - Hiện tại</p>
+                                <p class.text-body-secondary mb-0">GPA: <strong>8.2 / 10</strong></p>
+                            </div>
+                        </div>
+
+                        <h3 data-lang="en">Languages</h3>
+                        <h3 data-lang="vi">Ngôn ngữ</h3>
+                        <div class="card bg-transparent-card">
+                             <div class="card-body">
+                                <p class="mb-0" data-lang="en"><strong>English:</strong> Advanced</p>
+                                <p class="mb-0" data-lang="vi"><strong>Tiếng Anh:</strong> Nâng cao</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="reveal">
+            <div class="container text-center">
+                <h2 class="mb-4 title-reveal">
+                    <span data-lang="en">Get In Touch</span>
+                    <span data-lang="vi">Liên hệ</span>
+                </h2>
+                <p class="lead col-md-8 mx-auto" data-lang="en">I'm currently looking for OJT opportunities. Feel free to reach out!</p>
+                <p class="lead col-md-8 mx-auto" data-lang="vi">Tôi luôn sẵn sàng trao đổi về các cơ hội thực tập (OJT) và dự án.</p>
+                <div class="contact-info my-4">
+                    <p class="mb-1"><strong>Email:</strong> @quinc.ce190986@gmail.com</p>
+                    <p class="mb-1"><strong>Phone:</strong> 0706715887</p>
+                    <p class="mb-1"><strong>Location:</strong> Can Tho, Vietnam</p>
+                </div>
+                <div class="hero-links">
+                    <a href="https://www.linkedin.com/in/nguyen-cao-qui/" target="_blank" class="btn">[LinkedIn]</a>
+                    <a href="https://github.com/quincce190986" target="_blank" class="btn">[GitHub]</a>
+                    <a href="https://gitlab.com/quinc.ce190986" target="_blank" class="btn">[GitLab]</a>
+                    <a href="https://www.facebook.com/imcqsngx/" target="_blank" class="btn">[Facebook]</a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="text-center py-4 border-top">
+        <div class="container">
+            <p class="mb-0 text-body-secondary" data-lang="en">&copy; 2025 Nguyen Cao Qui. Built with HTML, CSS, JavaScript, and Bootstrap.</p>
+            <p class="mb-0 text-body-secondary" data-lang="vi">&copy; 2025 Nguyễn Cao Qui. Xây dựng với HTML, CSS, JavaScript, và Bootstrap.</p>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
