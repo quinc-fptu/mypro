@@ -486,6 +486,12 @@ body.rainbow-mode #upvote-button {
         position: relative;
     }
     
+    /* Bổ sung: Tối ưu padding cho nút Vouch Mobile (chỉ còn icon) */
+    #upvote-button-mobile {
+        padding: 0.3rem 0.6rem; 
+        font-size: 1rem; 
+    }
+    
     /* ĐÃ LOẠI BỎ: Lang switcher mobile không cần absolute position nữa */
     /* .lang-switcher.d-lg-none {
         position: absolute;
