@@ -198,7 +198,7 @@ body[lang="vi"] [data-lang="en"] {
     border-bottom: 1px solid #333;
     box-shadow: 0 4px 30px rgba(0, 0, 0, 0.2);
     transition: background-color 0.3s ease;
-    z-index: 9999; /* THÊM MỚI: Đảm bảo Navbar luôn ở trên mọi hiệu ứng */
+    z-index: 9999; /* Đảm bảo Navbar luôn ở trên mọi hiệu ứng */
 }
 
 .navbar-glass.scrolled {
@@ -206,9 +206,22 @@ body[lang="vi"] [data-lang="en"] {
     border-bottom: 1px solid #222;
 }
 
+/* CĂN CHỈNH LOGO */
 .navbar-glass .logo {
     color: var(--accent-color);
+    display: flex; 
+    align-items: center;
+    font-size: 1.5rem; /* Đảm bảo font size cho chữ */
+    font-weight: 700;
 }
+
+.navbar-logo {
+    height: 30px; /* Kích thước logo */
+    width: auto;
+    vertical-align: middle;
+    margin-top: -2px; /* Fine-tune căn chỉnh */
+}
+
 
 .navbar-glass .nav-link {
     font-weight: 600;
@@ -255,15 +268,16 @@ body[lang="vi"] [data-lang="en"] {
     height: 0;
 }
 
+/* KHÔI PHỤC CSS CHO SWITCH */
 .slider-pro {
     position: absolute;
     top: 0;
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #333; /* ĐÃ PHỤC HỒI */
-    transition: .4s; /* ĐÃ PHỤC HỒI */
-    border-radius: 28px; /* ĐÃ PHỤC HỒI */
+    background-color: #333;
+    transition: .4s;
+    border-radius: 28px;
 }
 
 .slider-pro:before {
@@ -471,12 +485,13 @@ body.rainbow-mode #upvote-button {
     #main-nav .container {
         position: relative;
     }
-
-    .lang-switcher.d-lg-none {
+    
+    /* ĐÃ LOẠI BỎ: Lang switcher mobile không cần absolute position nữa */
+    /* .lang-switcher.d-lg-none {
         position: absolute;
         right: 4.5rem;
         top: 0.75rem;
-    }
+    } */
 }
 
 @media (max-width: 768px) {
@@ -647,13 +662,12 @@ h2.title-reveal span {
     margin-right: 0.75rem;
 }
 
-/* THÊM MỚI: Căn chỉnh nút Vouch trong Navbar khi ở chế độ Mobile */
-.upvote-nav.d-flex.d-lg-none {
-    /* Đảm bảo nó nằm gọn và căn giữa trong menu */
+/* ĐÃ LOẠI BỎ: Không cần CSS tùy chỉnh cho vouch mobile vì đã dùng me-auto */
+/* .upvote-nav.d-flex.d-lg-none {
     padding: 0 1rem;
     margin-top: 1rem !important;
     margin-bottom: 1rem !important;
-}
+} */
 
 #upvote-button,
 #upvote-button-mobile {
