@@ -1136,7 +1136,16 @@ footer .border-top {
     justify-content: flex-start;
     gap: 0.5rem;
 }
-
+.about-image-container img {
+    border-radius: 50%;
+    /* THÊM CÁC THUỘC TÍNH SAU: */
+    user-select: none; /* Chặn chọn văn bản/ảnh (CSS3) */
+    -webkit-user-select: none; /* Tương thích trình duyệt cũ */
+    -moz-user-select: none; /* Tương thích Firefox */
+    -ms-user-select: none; /* Tương thích IE/Edge */
+    pointer-events: none; /* Ngăn chặn tất cả các tương tác chuột (bao gồm cả chuột phải và kéo) */
+    -webkit-touch-callout: none; /* Chặn menu ngữ cảnh trên iOS */
+}
 /* --- Disable Custom Cursor on Touch Devices --- */
 @media (pointer: coarse) {
     .cursor-dot,
