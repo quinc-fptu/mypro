@@ -261,9 +261,9 @@ body[lang="vi"] [data-lang="en"] {
     left: 0;
     right: 0;
     bottom: 0;
-    background-color: #333;
-    transition: .4s;
-    border-radius: 28px;
+    background-color: #333; /* ĐÃ PHỤC HỒI */
+    transition: .4s; /* ĐÃ PHỤC HỒI */
+    border-radius: 28px; /* ĐÃ PHỤC HỒI */
 }
 
 .slider-pro:before {
@@ -647,7 +647,16 @@ h2.title-reveal span {
     margin-right: 0.75rem;
 }
 
-#upvote-button {
+/* THÊM MỚI: Căn chỉnh nút Vouch trong Navbar khi ở chế độ Mobile */
+.upvote-nav.d-flex.d-lg-none {
+    /* Đảm bảo nó nằm gọn và căn giữa trong menu */
+    padding: 0 1rem;
+    margin-top: 1rem !important;
+    margin-bottom: 1rem !important;
+}
+
+#upvote-button,
+#upvote-button-mobile {
     padding: 0.4rem 0.8rem;
     font-size: 0.9rem;
     font-weight: 600;
@@ -658,20 +667,23 @@ h2.title-reveal span {
     transition: all 0.3s ease;
 }
 
-#upvote-button:hover:not(:disabled) {
+#upvote-button:hover:not(:disabled),
+#upvote-button-mobile:hover:not(:disabled) {
     background-color: var(--accent-color);
     color: var(--bg-color);
     transform: scale(1.05);
 }
 
-#upvote-button:disabled {
+#upvote-button:disabled,
+#upvote-button-mobile:disabled {
     color: #555;
     border-color: #333;
     background-color: #222;
     opacity: 0.7;
 }
 
-#vote-thanks {
+#vote-thanks,
+#vote-thanks-mobile {
     display: none;
     color: var(--accent-color);
     font-style: italic;
@@ -679,7 +691,8 @@ h2.title-reveal span {
     font-weight: 600;
 }
 
-#upvote-button:disabled+#vote-thanks {
+#upvote-button:disabled+#vote-thanks,
+#upvote-button-mobile:disabled+#vote-thanks-mobile {
     display: block;
 }
 

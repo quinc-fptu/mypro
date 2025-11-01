@@ -37,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 resetTypingEffect(); 
                 resetTerminalWelcome(); 
-                initFocusAndScrollSpy(); 
+                // Không gọi lại initFocusAndScrollSpy ở đây, nó sẽ được gọi khi trang tải lại (vì set lang)
             });
         }
     });
@@ -458,7 +458,9 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
-    initFocusAndScrollSpy();
+    // SỬA LỖI: Trì hoãn việc khởi tạo Scroll Spy để tránh tự cuộn khi tải trang.
+    setTimeout(initFocusAndScrollSpy, 1000); 
+
 
     setTimeout(() => {
         if (window.firebase) {
