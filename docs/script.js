@@ -260,7 +260,7 @@ document.addEventListener("DOMContentLoaded", () => {
       linkedin: "https://www.linkedin.com/in/nguyen-cao-qui/",
       github: "https://github.com/quinc-fptu",
       gitlab: "https://gitlab.com/quinc.ce190986",
-      facebook: "https://facebook.com/imcqsngx/",
+      // facebook: "https://facebook.com//",
     };
 
     const virtualFiles = {
@@ -361,7 +361,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '  <span class="terminal-help-cmd">linkedin</span>      - Open my LinkedIn profile\n' +
         '  <span class="terminal-help-cmd">github</span>        - Open my GitHub profile\n' +
         '  <span class="terminal-help-cmd">gitlab</span>        - Open my GitLab profile\n' +
-        '  <span class="terminal-help-cmd">facebook</span>      - Open my Facebook profile\n' +
+        // '  <span class="terminal-help-cmd">facebook</span>      - Open my Facebook profile\n' +
         "--- Utilities ---\n" +
         '  <span class="terminal-help-cmd">clear</span>         - Clear the terminal',
       vi:
@@ -372,7 +372,7 @@ document.addEventListener("DOMContentLoaded", () => {
         '  <span class="terminal-help-cmd">linkedin</span>      - Mở trang LinkedIn\n' +
         '  <span class="terminal-help-cmd">github</span>        - Mở trang GitHub\n' +
         '  <span class="terminal-help-cmd">gitlab</span>        - Mở trang GitLab\n' +
-        '  <span class="terminal-help-cmd">facebook</span>      - Mở trang Facebook\n' +
+        // '  <span class="terminal-help-cmd">facebook</span>      - Mở trang Facebook\n' +
         "--- Tiện ích ---\n" +
         '  <span class="terminal-help-cmd">clear</span>         - Xóa màn hình',
     };
