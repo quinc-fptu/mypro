@@ -199,13 +199,27 @@ document.addEventListener('DOMContentLoaded', () => {
     // START NEW CONFETTI FUNCTION FOR IMPACT
     function runConfetti() {
         if (window.confetti) {
+            // Đợt Confetti Bùng nổ chính
             confetti({
-                particleCount: 200, 
-                spread: 120,
-                startVelocity: 55,
-                origin: { y: 0.5 },
-                colors: ['#00aaff', '#00ffaa', '#aaff00', '#ffaa00', '#ff00aa', '#aa00ff', '#ffffff']
+                particleCount: 300, // Tăng số lượng hạt
+                spread: 180, // Phủ toàn màn hình
+                startVelocity: 60, // Tốc độ nhanh
+                decay: 0.9, // Giảm decay để hạt tồn tại lâu hơn
+                ticks: 500, // Kéo dài thời gian
+                origin: { y: 0.4 }, // Vị trí cao hơn
+                colors: ['#00aaff', '#00ffaa', '#aaff00', '#ffaa00', '#ff00aa', '#aa00ff', '#ffffff', '#ff0000', '#00ff00', '#0000ff']
             });
+            
+            // Kích hoạt thêm một đợt phụ ngay sau đó để tạo cảm giác bùng nổ kép
+            setTimeout(() => {
+                confetti({
+                    particleCount: 150,
+                    spread: 120,
+                    startVelocity: 45,
+                    scalar: 0.7, // Hạt nhỏ hơn
+                    origin: { y: 0.7 }
+                });
+            }, 150);
         }
     }
     // END NEW CONFETTI FUNCTION FOR IMPACT
@@ -450,8 +464,11 @@ document.addEventListener('DOMContentLoaded', () => {
         if (window.firebase) {
             const { db, doc, getDoc, updateDoc, increment } = window.firebase;
             
-            const upvoteButton = document.getElementById('upvote-button');
-            const voteCountSpan = document.getElementById('vote-count');
+            // THAY ĐỔI: Khai báo cả hai nút/span (Desktop và Mobile)
+            const upvoteButtonDesktop = document.getElementById('upvote-button');
+            const voteCountSpanDesktop = document.getElementById('vote-count');
+            const upvoteButtonMobile = document.getElementById('upvote-button-mobile');
+            const voteCountSpanMobile = document.getElementById('vote-count-mobile');
             
             const voteDocRef = doc(db, "votes", "portfolio");
 
@@ -460,7 +477,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     const docSnap = await getDoc(voteDocRef);
                     if (docSnap.exists()) {
                         const count = docSnap.data().count;
-                        voteCountSpan.textContent = count;
+                        // Cập nhật cả hai span
+                        if (voteCountSpanDesktop) voteCountSpanDesktop.textContent = count;
+                        if (voteCountSpanMobile) voteCountSpanMobile.textContent = count;
                     } else {
                         console.log("Không tìm thấy document vote!");
                     }
@@ -468,9 +487,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     console.error("Lỗi khi lấy vote: ", e);
                 }
             }
-
-            async function incrementVote() {
-                upvoteButton.disabled = true;
+            
+            // THAY ĐỔI: Hàm incrementVote được chỉnh sửa để kích hoạt confetti từ nút được nhấn
+            async function incrementVote(event) {
+                const clickedButton = event.currentTarget;
+                // Vô hiệu hóa cả hai nút sau khi vote
+                if (upvoteButtonDesktop) upvoteButtonDesktop.disabled = true;
+                if (upvoteButtonMobile) upvoteButtonMobile.disabled = true;
 
                 try {
                     await updateDoc(voteDocRef, {
@@ -481,8 +504,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                     await getVoteCount(); 
                     
-                    if (window.confetti) {
-                        const rect = upvoteButton.getBoundingClientRect();
+                    if (window.confetti && clickedButton) {
+                        const rect = clickedButton.getBoundingClientRect();
                         const origin = {
                             x: (rect.left + rect.width / 2) / window.innerWidth,
                             y: (rect.top + rect.height / 2) / window.innerHeight
@@ -497,16 +520,21 @@ document.addEventListener('DOMContentLoaded', () => {
                     
                 } catch (e) {
                     console.error("Lỗi khi update vote: ", e);
-                    upvoteButton.disabled = false; 
+                    // Bật lại các nút nếu có lỗi
+                    if (upvoteButtonDesktop) upvoteButtonDesktop.disabled = false;
+                    if (upvoteButtonMobile) upvoteButtonMobile.disabled = false;
                     localStorage.removeItem('hasVotedPortfolio');
                 }
             }
 
             function checkVoteStatus() {
                 if (localStorage.getItem('hasVotedPortfolio') === 'true') {
-                    upvoteButton.disabled = true;
+                    if (upvoteButtonDesktop) upvoteButtonDesktop.disabled = true;
+                    if (upvoteButtonMobile) upvoteButtonMobile.disabled = true;
                 } else {
-                    upvoteButton.addEventListener('click', incrementVote);
+                    // Gắn Event Listener cho cả hai nút
+                    if (upvoteButtonDesktop) upvoteButtonDesktop.addEventListener('click', incrementVote);
+                    if (upvoteButtonMobile) upvoteButtonMobile.addEventListener('click', incrementVote);
                 }
             }
 
