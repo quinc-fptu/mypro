@@ -132,30 +132,11 @@ main.has-focus>section.is-focused {
     transform: scale(1);
 }
 
-/* --- [ĐÃ SỬA] Language Switching (Final Fix) --- */
-/* 1. Ẩn ngôn ngữ không hoạt động */
-[lang="en"] [data-lang="vi"],
-[lang="vi"] [data-lang="en"] {
+/* --- [ĐÃ SỬA] Language Switching (FIXED: Chỉ giữ quy tắc ẩn mạnh mẽ) --- */
+/* Quy tắc ẩn mạnh nhất: Ẩn mọi phần tử có data-lang KHÔNG PHÙ HỢP với thuộc tính lang của thẻ body */
+body[lang="en"] [data-lang="vi"],
+body[lang="vi"] [data-lang="en"] {
     display: none !important;
-}
-
-/* 2. Đảm bảo ngôn ngữ hoạt động được hiển thị rõ ràng với display phù hợp */
-/* Cho các phần tử cấp khối (block-level) */
-[lang="vi"] h1[data-lang="vi"],
-[lang="vi"] h2[data-lang="vi"],
-[lang="vi"] h3[data-lang="vi"],
-[lang="vi"] h4[data-lang="vi"],
-[lang="vi"] h5[data-lang="vi"],
-[lang="vi"] p[data-lang="vi"],
-[lang="vi"] li[data-lang="vi"] {
-    display: block !important;
-}
-
-/* Cho các phần tử nội tuyến (inline/inline-block) */
-[lang="vi"] a[data-lang="vi"],
-[lang="vi"] span[data-lang="vi"],
-[lang="vi"] strong[data-lang="vi"] {
-    display: initial !important;
 }
 
 #progress-bar {
@@ -351,6 +332,80 @@ input:checked+.slider-pro:before {
     background-color: var(--accent-color);
     color: var(--bg-color);
 }
+
+/* START FIX: Hiệu ứng Rainbow Border */
+body.rainbow-mode .btn {
+    /* Thêm box-shadow để tạo hiệu ứng glow và hỗ trợ render viền màu động */
+    box-shadow: 
+        0 0 10px var(--accent-color), /* Tăng cường glow ngoài */
+        0 0 20px var(--accent-color) inset, /* Tăng cường glow trong */
+        0 0 5px #fff; /* Thêm glow trắng bên trong */
+
+    /* 1. Đảm bảo viền luôn lấy màu động và vô hiệu hóa transition */
+    border: 2px solid var(--accent-color) !important;
+    transition: none !important;
+    
+    /* 2. Đặt màu chữ và nền cố định */
+    color: #fff !important; 
+    background-color: transparent !important;
+
+    /* 3. Thêm hiệu ứng nhòe (glitch/noise) tinh tế cho chữ */
+    text-shadow: 
+        1px 1px 0 #000, 
+        -1px -1px 0 var(--accent-color);
+    
+    /* 4. Thêm animation chớp nháy màu (color-pulse) */
+    animation: color-pulse 0.2s linear infinite alternate;
+}
+
+/* Định nghĩa animation chớp nháy màu (color-pulse) */
+@keyframes color-pulse {
+    0% { filter: brightness(1.2) hue-rotate(0deg); }
+    50% { filter: brightness(0.8) hue-rotate(5deg); }
+    100% { filter: brightness(1.2) hue-rotate(0deg); }
+}
+
+/* Đảm bảo Nav link có màu rainbow */
+body.rainbow-mode .navbar-glass .logo,
+body.rainbow-mode .navbar-glass .nav-link,
+body.rainbow-mode .navbar-glass .nav-link.active {
+    color: #fff !important; /* Base color là trắng */
+    /* Áp dụng hiệu ứng neon glow tương tự như neon-title để có màu cầu vồng */
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px var(--accent-color),
+        0 0 20px var(--accent-color);
+    transition: none !important; /* Vô hiệu hóa transition màu */
+}
+
+
+/* Bật lại transition cho hiệu ứng từ tính và lắc nhẹ (shake) */
+body.rainbow-mode .magnetic-btn {
+    /* Áp dụng lại animation shake và giữ transition cho transform */
+    animation: shake 0.3s linear infinite; 
+    transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1) !important;
+}
+
+body.rainbow-mode .magnetic-btn:hover {
+    animation: none !important;
+}
+
+/* Đảm bảo hover vẫn hoạt động */
+body.rainbow-mode .btn:hover {
+    box-shadow: none; /* Tắt box-shadow khi hover */
+    background-color: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    border-color: var(--accent-color) !important; /* Vẫn phải đảm bảo border lấy màu động khi hover */
+}
+
+/* Đặc biệt xử lý upvote-button */
+body.rainbow-mode #upvote-button {
+    animation: shake 0.3s linear infinite;
+    transition: none !important; 
+    text-shadow: none;
+}
+/* END FIX: Hiệu ứng Rainbow Border */
+
 
 .hero-subtext {
     font-size: 0.9rem;
@@ -697,6 +752,25 @@ h2.title-reveal span {
     }
 }
 
+/* START NEW KEYFRAMES FOR KONAMI IMPACT */
+@keyframes konami-flash {
+    0% { transform: scale(1.02); filter: contrast(1.5); }
+    100% { transform: scale(1); filter: contrast(1); }
+}
+
+@keyframes lively-background {
+    0% { filter: saturate(1.2) brightness(1); }
+    100% { filter: saturate(1.5) brightness(1.1); }
+}
+/* END NEW KEYFRAMES FOR KONAMI IMPACT */
+
+
+@keyframes color-pulse {
+    0% { filter: brightness(1.2) hue-rotate(0deg); }
+    50% { filter: brightness(0.8) hue-rotate(5deg); }
+    100% { filter: brightness(1.2) hue-rotate(0deg); }
+}
+
 @keyframes rainbow-text {
     0% {
         --accent-color: #00aaff;
@@ -739,13 +813,78 @@ h2.title-reveal span {
     }
 }
 
+/* APPLY KONAMI IMPACT ANIMATION */
 body.rainbow-mode {
-    animation: rainbow-text 3s linear infinite alternate;
+    animation: rainbow-text 1.5s linear infinite alternate, /* Tăng tốc chu kỳ cầu vồng */
+               konami-flash 0.3s ease-out 1,
+               lively-background 0.5s linear infinite alternate; /* Thêm pulse background */
 }
 
+/* FIX: Hiệu ứng Rainbow Border */
+body.rainbow-mode .btn {
+    /* Thêm box-shadow để tạo hiệu ứng glow và hỗ trợ render viền màu động */
+    box-shadow: 
+        0 0 10px var(--accent-color), /* Tăng cường glow ngoài */
+        0 0 20px var(--accent-color) inset, /* Tăng cường glow trong */
+        0 0 5px #fff; /* Thêm glow trắng bên trong */
+
+    /* 1. Đảm bảo viền luôn lấy màu động và vô hiệu hóa transition */
+    border: 2px solid var(--accent-color) !important;
+    transition: none !important;
+    
+    /* 2. Đặt màu chữ và nền cố định */
+    color: #fff !important; 
+    background-color: transparent !important;
+
+    /* 3. Thêm hiệu ứng nhòe (glitch/noise) tinh tế cho chữ */
+    text-shadow: 
+        1px 1px 0 #000, 
+        -1px -1px 0 var(--accent-color);
+    
+    /* 4. Thêm animation chớp nháy màu (color-pulse) */
+    animation: color-pulse 0.2s linear infinite alternate;
+}
+
+/* Đảm bảo Nav link có màu rainbow */
+body.rainbow-mode .navbar-glass .logo,
+body.rainbow-mode .navbar-glass .nav-link,
+body.rainbow-mode .navbar-glass .nav-link.active {
+    color: #fff !important; /* Base color là trắng */
+    /* Áp dụng hiệu ứng neon glow tương tự như neon-title để có màu cầu vồng */
+    text-shadow:
+        0 0 5px #fff,
+        0 0 10px var(--accent-color),
+        0 0 20px var(--accent-color);
+    transition: none !important; /* Vô hiệu hóa transition màu */
+}
+
+
+/* Bật lại transition cho hiệu ứng từ tính và lắc nhẹ (shake) */
+body.rainbow-mode .magnetic-btn {
+    /* Áp dụng lại animation shake và giữ transition cho transform */
+    animation: shake 0.3s linear infinite; 
+    transition: transform 0.3s cubic-bezier(0.2, 1, 0.3, 1) !important;
+}
+
+body.rainbow-mode .magnetic-btn:hover {
+    animation: none !important;
+}
+
+/* Đảm bảo hover vẫn hoạt động */
+body.rainbow-mode .btn:hover {
+    box-shadow: none; /* Tắt box-shadow khi hover */
+    background-color: var(--accent-color) !important;
+    color: var(--bg-color) !important;
+    border-color: var(--accent-color) !important; /* Vẫn phải đảm bảo border lấy màu động khi hover */
+}
+
+/* Đặc biệt xử lý upvote-button */
 body.rainbow-mode #upvote-button {
     animation: shake 0.3s linear infinite;
+    transition: none !important; 
+    text-shadow: none;
 }
+
 
 /* --- Fix Hero Links trên Mobile --- */
 .hero-links {

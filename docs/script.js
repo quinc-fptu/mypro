@@ -195,6 +195,21 @@ document.addEventListener('DOMContentLoaded', () => {
             card.style.transform = 'perspective(1000px) rotateX(0) rotateY(0) scale(1)';
         });
     });
+    
+    // START NEW CONFETTI FUNCTION FOR IMPACT
+    function runConfetti() {
+        if (window.confetti) {
+            confetti({
+                particleCount: 200, 
+                spread: 120,
+                startVelocity: 55,
+                origin: { y: 0.5 },
+                colors: ['#00aaff', '#00ffaa', '#aaff00', '#ffaa00', '#ff00aa', '#aa00ff', '#ffffff']
+            });
+        }
+    }
+    // END NEW CONFETTI FUNCTION FOR IMPACT
+
 
     const terminalWindow = document.getElementById('terminal-window');
     const terminalOutput = document.getElementById('terminal-output');
@@ -297,7 +312,9 @@ document.addEventListener('DOMContentLoaded', () => {
             } else if (cmd === 'help') {
                 appendOutput(helpCommand[lang]);
             } else if (cmd === 'qisngx') {
+                // Lệnh terminal để bật/tắt Rainbow Mode
                 document.body.classList.toggle('rainbow-mode');
+                runConfetti(); // KÍCH HOẠT CONFETTI
             } else if (linkCommands[cmd]) {
                 const url = linkCommands[cmd];
                 appendOutput(`Opening ${cmd}...`);
@@ -533,10 +550,18 @@ document.addEventListener('DOMContentLoaded', () => {
         let konamiPosition = 0;
         
         document.addEventListener('keydown', (e) => {
+            
+            // FIX: Ngăn xung đột giữa Terminal và Konami Code
+            if (document.activeElement.id === 'terminal-input') {
+                return; 
+            }
+            // Hết FIX
+
             if (e.key.toLowerCase() === konamiCode[konamiPosition]) {
                 konamiPosition++;
                 if (konamiPosition === konamiCode.length) {
                     document.body.classList.toggle('rainbow-mode');
+                    runConfetti(); // KÍCH HOẠT CONFETTI
                     konamiPosition = 0;
                 }
             } else {
