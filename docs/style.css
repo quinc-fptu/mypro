@@ -815,8 +815,12 @@ h2.title-reveal span {
 
 /* APPLY KONAMI IMPACT ANIMATION */
 body.rainbow-mode {
-    animation: rainbow-text 1.5s linear infinite alternate, /* Tăng tốc chu kỳ cầu vồng */
-               konami-flash 0.3s ease-out 1,
+    animation: rainbow-text 1.5s linear infinite alternate; /* Tăng tốc chu kỳ cầu vồng */
+}
+
+/* THÊM MỚI: Áp dụng hiệu ứng transform/filter lên main để không làm hỏng fixed position của navbar và cursor */
+body.rainbow-mode main {
+    animation: konami-flash 0.3s ease-out 1,
                lively-background 0.5s linear infinite alternate; /* Thêm pulse background */
 }
 
