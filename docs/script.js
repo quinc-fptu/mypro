@@ -1,52 +1,94 @@
 document.addEventListener("DOMContentLoaded", () => {
+  // ===== LOADING SCREEN =====
+  const loadingScreen = document.getElementById("loading-screen");
+  
+  function hideLoadingScreen() {
+    if (loadingScreen) {
+      loadingScreen.classList.add("hidden");
+      setTimeout(() => {
+        if (loadingScreen.parentNode) {
+          loadingScreen.style.display = "none";
+        }
+      }, 500);
+    }
+  }
+
+  // Hide loading screen when page is fully loaded
+  if (document.readyState === "complete") {
+    setTimeout(hideLoadingScreen, 300);
+  } else {
+    window.addEventListener("load", () => {
+      setTimeout(hideLoadingScreen, 300);
+    });
+  }
+
+  // ===== CONSTANTS =====
+  const KONAMI_CODE = ["q", "i", "s", "n", "g", "x"];
+  const RAINBOW_COMMAND = "qisngx";
+  const STORAGE_KEYS = {
+    lang: "lang",
+    hasVoted: "hasVotedPortfolio",
+    viewCount: "portfolioViewCount",
+    theme: "theme",
+  };
+
+  const TITLES = {
+    en: [
+      "Intern Web Developer",
+      "C# & .NET Learner",
+      "Vovinam Athlete",
+    ],
+    vi: [
+      "Thực tập sinh Web",
+      "Người học C# & .NET",
+      "Võ sinh Vovinam",
+    ],
+  };
+
+  // ===== DOM ELEMENTS =====
   const body = document.body;
   const mainElement = document.querySelector("main");
-
   const langToggles = [
     document.getElementById("lang-toggle-desktop"),
     document.getElementById("lang-toggle-mobile"),
-  ];
+  ].filter(Boolean);
   const typingElement = document.getElementById("typing-effect");
+  
+  let currentTitles = TITLES.en;
 
-  const enTitles = [
-    "Intern Web Developer",
-    "C# & .NET Learner",
-    "Vovinam Athlete",
-  ];
-  const viTitles = [
-    "Thực tập sinh Web",
-    "Người học C# & .NET",
-    "Võ sinh Vovinam",
-  ];
-  let currentTitles = enTitles;
+  // ===== LANGUAGE MANAGEMENT =====
+  function initLanguage() {
+    const savedLang = localStorage.getItem(STORAGE_KEYS.lang) || "en";
+    body.setAttribute("lang", savedLang);
+    const isVietnamese = savedLang === "vi";
+    
+    langToggles.forEach((toggle) => {
+      toggle.checked = isVietnamese;
+    });
+    
+    currentTitles = isVietnamese ? TITLES.vi : TITLES.en;
+  }
 
-  const savedLang = localStorage.getItem("lang") || "en";
-  body.setAttribute("lang", savedLang);
-  const isVietnamese = savedLang === "vi";
+  function switchLanguage(newLang) {
+    body.setAttribute("lang", newLang);
+    localStorage.setItem(STORAGE_KEYS.lang, newLang);
+    currentTitles = newLang === "vi" ? TITLES.vi : TITLES.en;
+
+    langToggles.forEach((toggle) => {
+      toggle.checked = newLang === "vi";
+    });
+
+    if (typeof resetTypingEffect === "function") resetTypingEffect();
+    if (typeof resetTerminalWelcome === "function") resetTerminalWelcome();
+  }
+
+  initLanguage();
+
   langToggles.forEach((toggle) => {
-    if (toggle) toggle.checked = isVietnamese;
-  });
-  currentTitles = isVietnamese ? viTitles : enTitles;
-
-  langToggles.forEach((toggle) => {
-    if (toggle) {
-      toggle.addEventListener("change", () => {
-        const newLang = toggle.checked ? "vi" : "en";
-        body.setAttribute("lang", newLang);
-        localStorage.setItem("lang", newLang);
-        currentTitles = toggle.checked ? viTitles : enTitles;
-
-        langToggles.forEach((otherToggle) => {
-          if (otherToggle && otherToggle !== toggle) {
-            otherToggle.checked = toggle.checked;
-          }
-        });
-
-        resetTypingEffect();
-        resetTerminalWelcome();
-        // Không gọi lại initFocusAndScrollSpy ở đây, nó sẽ được gọi khi trang tải lại (vì set lang)
-      });
-    }
+    toggle.addEventListener("change", () => {
+      const newLang = toggle.checked ? "vi" : "en";
+      switchLanguage(newLang);
+    });
   });
 
   let titleIndex = 0;
@@ -93,76 +135,83 @@ document.addEventListener("DOMContentLoaded", () => {
     resetTypingEffect();
   }
 
+  // ===== CUSTOM CURSOR (Disabled for better performance) =====
+  // Custom cursor disabled to improve performance - use native cursor instead
   const cursorDot = document.querySelector(".cursor-dot");
   const cursorOutline = document.querySelector(".cursor-dot-outline");
-  let mouseX = window.innerWidth / 2;
-  let mouseY = window.innerHeight / 2;
+  
+  // Hide custom cursor elements
+  if (cursorDot) cursorDot.style.display = "none";
+  if (cursorOutline) cursorOutline.style.display = "none";
 
-  window.addEventListener("mousemove", (e) => {
-    mouseX = e.clientX;
-    mouseY = e.clientY;
-  });
+  // ===== HERO SECTION MOUSE TRACKING (Removed for performance) =====
+  // Mouse tracking removed to reduce lag
 
-  function updateCursor() {
-    if (cursorDot) {
-      cursorDot.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    }
-    if (cursorOutline) {
-      cursorOutline.style.transform = `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    }
-    requestAnimationFrame(updateCursor);
-  }
-  if (cursorDot && cursorOutline) {
-    updateCursor();
-  }
-
-  const heroSection = document.getElementById("hero");
-  if (heroSection) {
-    heroSection.addEventListener("mousemove", (e) => {
-      const rect = heroSection.getBoundingClientRect();
-      const x = e.clientX - rect.left;
-      const y = e.clientY - rect.top;
-      heroSection.style.setProperty("--mouse-x", `${x}px`);
-      heroSection.style.setProperty("--mouse-y", `${y}px`);
-    });
-  }
-
+  // ===== SCROLL HANDLERS =====
   const progressBar = document.getElementById("progress-bar");
   const mainNav = document.getElementById("main-nav");
+  const scrollToTopBtn = document.getElementById("scroll-to-top");
 
-  window.addEventListener("scroll", () => {
+  let ticking = false;
+  function updateOnScroll() {
     const scrollTop = window.scrollY;
     const docHeight = document.documentElement.scrollHeight;
     const winHeight = window.innerHeight;
-    const scrollPercent = (scrollTop / (docHeight - winHeight)) * 100;
+    const scrollPercent = Math.min(100, (scrollTop / (docHeight - winHeight)) * 100);
 
     if (progressBar) {
       progressBar.style.width = scrollPercent + "%";
     }
 
     if (mainNav) {
-      if (scrollTop > 50) {
-        mainNav.classList.add("scrolled");
+      mainNav.classList.toggle("scrolled", scrollTop > 50);
+    }
+
+    // Show/hide scroll to top button
+    if (scrollToTopBtn) {
+      if (scrollTop > 300) {
+        scrollToTopBtn.classList.add("visible");
       } else {
-        mainNav.classList.remove("scrolled");
+        scrollToTopBtn.classList.remove("visible");
       }
     }
-  });
 
+    ticking = false;
+  }
+
+  window.addEventListener("scroll", () => {
+    if (!ticking) {
+      window.requestAnimationFrame(updateOnScroll);
+      ticking = true;
+    }
+  }, { passive: true });
+
+  // Scroll to top functionality
+  if (scrollToTopBtn) {
+    scrollToTopBtn.addEventListener("click", () => {
+      window.scrollTo({
+        top: 0,
+        behavior: "smooth"
+      });
+    });
+  }
+
+  // Optimized reveal observer with reduced threshold for better performance
   const revealElements = document.querySelectorAll(".reveal");
   const revealObserver = new IntersectionObserver(
     (entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting) {
           entry.target.classList.add("visible");
-        } else {
-          entry.target.classList.remove("visible");
+          // Unobserve after visible to reduce work
+          revealObserver.unobserve(entry.target);
         }
       });
     },
     {
       root: null,
-      threshold: 0.15,
+      threshold: 0.1,
+      rootMargin: "50px",
     }
   );
   revealElements.forEach((el) => {
@@ -195,61 +244,48 @@ document.addEventListener("DOMContentLoaded", () => {
     skillObserver.observe(skillsSection);
   }
 
-  const projectCards = document.querySelectorAll(".project-card");
-  const tiltStrength = 15;
-  projectCards.forEach((card) => {
-    card.addEventListener("mousemove", (e) => {
-      const rect = card.getBoundingClientRect();
-      const mouseX = e.clientX - rect.left - rect.width / 2;
-      const mouseY = e.clientY - rect.top - rect.height / 2;
-      const rotateY = (mouseX / (rect.width / 2)) * tiltStrength;
-      const rotateX = -(mouseY / (rect.height / 2)) * tiltStrength;
-      card.style.transform = `perspective(1000px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale(1.05)`;
-    });
-    card.addEventListener("mouseleave", () => {
-      card.style.transform =
-        "perspective(1000px) rotateX(0) rotateY(0) scale(1)";
-    });
-  });
+  // ===== PROJECT CARDS TILT (Removed for performance) =====
+  // 3D tilt effect removed to improve performance and reduce lag
 
-  // START NEW CONFETTI FUNCTION FOR IMPACT
+  // ===== RAINBOW MODE & CONFETTI =====
+  function toggleRainbowMode() {
+    body.classList.toggle("rainbow-mode");
+    // Confetti removed for performance
+  }
+
   function runConfetti() {
-    if (window.confetti) {
-      // Đợt Confetti Bùng nổ chính
+    if (!window.confetti) return;
+
+    try {
+      // Main confetti burst
       confetti({
-        particleCount: 300, // Tăng số lượng hạt
-        spread: 180, // Phủ toàn màn hình
-        startVelocity: 60, // Tốc độ nhanh
-        decay: 0.9, // Giảm decay để hạt tồn tại lâu hơn
-        ticks: 500, // Kéo dài thời gian
-        origin: { y: 0.4 }, // Vị trí cao hơn
+        particleCount: 300,
+        spread: 180,
+        startVelocity: 60,
+        decay: 0.9,
+        ticks: 500,
+        origin: { y: 0.4 },
         colors: [
-          "#00aaff",
-          "#00ffaa",
-          "#aaff00",
-          "#ffaa00",
-          "#ff00aa",
-          "#aa00ff",
-          "#ffffff",
-          "#ff0000",
-          "#00ff00",
-          "#0000ff",
+          "#00aaff", "#00ffaa", "#aaff00", "#ffaa00",
+          "#ff00aa", "#aa00ff", "#ffffff", "#ff0000",
+          "#00ff00", "#0000ff",
         ],
       });
 
-      // Kích hoạt thêm một đợt phụ ngay sau đó để tạo cảm giác bùng nổ kép
+      // Secondary burst
       setTimeout(() => {
         confetti({
           particleCount: 150,
           spread: 120,
           startVelocity: 45,
-          scalar: 0.7, // Hạt nhỏ hơn
+          scalar: 0.7,
           origin: { y: 0.7 },
         });
       }, 150);
+    } catch (error) {
+      console.error("Error running confetti:", error);
     }
   }
-  // END NEW CONFETTI FUNCTION FOR IMPACT
 
   const terminalWindow = document.getElementById("terminal-window");
   const terminalOutput = document.getElementById("terminal-output");
@@ -357,25 +393,36 @@ document.addEventListener("DOMContentLoaded", () => {
         "--- File System ---\n" +
         '  <span class="terminal-help-cmd">ls</span>          - List files\n' +
         '  <span class="terminal-help-cmd">cat [file]</span>    - Read file content (e.g., cat about.txt)\n' +
+        '  <span class="terminal-help-cmd">pwd</span>          - Print working directory\n' +
         "--- Quick Links ---\n" +
         '  <span class="terminal-help-cmd">linkedin</span>      - Open my LinkedIn profile\n' +
         '  <span class="terminal-help-cmd">github</span>        - Open my GitHub profile\n' +
         '  <span class="terminal-help-cmd">gitlab</span>        - Open my GitLab profile\n' +
-        // '  <span class="terminal-help-cmd">facebook</span>      - Open my Facebook profile\n' +
         "--- Utilities ---\n" +
+        '  <span class="terminal-help-cmd">whoami</span>        - Display current user\n' +
+        '  <span class="terminal-help-cmd">date</span>          - Show current date and time\n' +
+        '  <span class="terminal-help-cmd">echo [text]</span>  - Print text to terminal\n' +
+        '  <span class="terminal-help-cmd">history</span>       - Show command history\n' +
         '  <span class="terminal-help-cmd">clear</span>         - Clear the terminal',
       vi:
         "--- Hệ thống Tệp ---\n" +
         '  <span class="terminal-help-cmd">ls</span>          - Liệt kê tệp\n' +
         '  <span class="terminal-help-cmd">cat [tên tệp]</span> - Đọc nội dung tệp (ví dụ: cat about.txt)\n' +
+        '  <span class="terminal-help-cmd">pwd</span>          - Hiển thị thư mục hiện tại\n' +
         "--- Liên kết nhanh ---\n" +
         '  <span class="terminal-help-cmd">linkedin</span>      - Mở trang LinkedIn\n' +
         '  <span class="terminal-help-cmd">github</span>        - Mở trang GitHub\n' +
         '  <span class="terminal-help-cmd">gitlab</span>        - Mở trang GitLab\n' +
-        // '  <span class="terminal-help-cmd">facebook</span>      - Mở trang Facebook\n' +
         "--- Tiện ích ---\n" +
+        '  <span class="terminal-help-cmd">whoami</span>        - Hiển thị người dùng hiện tại\n' +
+        '  <span class="terminal-help-cmd">date</span>          - Hiển thị ngày và giờ\n' +
+        '  <span class="terminal-help-cmd">echo [văn bản]</span> - In văn bản ra terminal\n' +
+        '  <span class="terminal-help-cmd">history</span>       - Hiển thị lịch sử lệnh\n' +
         '  <span class="terminal-help-cmd">clear</span>         - Xóa màn hình',
     };
+
+    let commandHistory = [];
+    let historyIndex = -1;
 
     function appendOutput(htmlContent) {
       terminalOutput.innerHTML += `<div class="terminal-line">${htmlContent}</div>`;
@@ -383,10 +430,19 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function executeCommand(command) {
+      if (!command.trim()) return;
+      
       const lang = document.body.getAttribute("lang") || "en";
-      const parts = command.toLowerCase().trim().split(" ").filter(Boolean);
-      const cmd = parts[0];
+      const parts = command.trim().split(" ").filter(Boolean);
+      const cmd = parts[0].toLowerCase();
       const args = parts.slice(1);
+
+      // Add to history
+      if (command.trim() && commandHistory[commandHistory.length - 1] !== command.trim()) {
+        commandHistory.push(command.trim());
+        if (commandHistory.length > 50) commandHistory.shift();
+      }
+      historyIndex = commandHistory.length;
 
       appendOutput(
         `<span class="terminal-prompt">~$</span> <span class="terminal-command">${command}</span>`
@@ -396,13 +452,39 @@ document.addEventListener("DOMContentLoaded", () => {
         terminalOutput.innerHTML = "";
       } else if (cmd === "help") {
         appendOutput(helpCommand[lang]);
-      } else if (cmd === "qisngx") {
-        // Lệnh terminal để bật/tắt Rainbow Mode
-        document.body.classList.toggle("rainbow-mode");
-        runConfetti(); // KÍCH HOẠT CONFETTI
+      } else if (cmd === RAINBOW_COMMAND) {
+        toggleRainbowMode();
+      } else if (cmd === "whoami") {
+        appendOutput(lang === "vi" ? "QuiNC (Nguyễn Cao Quí)" : "QuiNC (Nguyen Cao Qui)");
+      } else if (cmd === "date") {
+        const now = new Date();
+        const dateStr = now.toLocaleString(lang === "vi" ? "vi-VN" : "en-US", {
+          weekday: "long",
+          year: "numeric",
+          month: "long",
+          day: "numeric",
+          hour: "2-digit",
+          minute: "2-digit",
+          second: "2-digit",
+        });
+        appendOutput(dateStr);
+      } else if (cmd === "echo") {
+        const text = args.join(" ");
+        appendOutput(text || "");
+      } else if (cmd === "pwd") {
+        appendOutput("~/portfolio");
+      } else if (cmd === "history") {
+        if (commandHistory.length === 0) {
+          appendOutput(lang === "vi" ? "Lịch sử lệnh trống." : "Command history is empty.");
+        } else {
+          const historyList = commandHistory
+            .map((cmd, idx) => `${idx + 1}. ${cmd}`)
+            .join("\n");
+          appendOutput(historyList);
+        }
       } else if (linkCommands[cmd]) {
         const url = linkCommands[cmd];
-        appendOutput(`Opening ${cmd}...`);
+        appendOutput(lang === "vi" ? `Đang mở ${cmd}...` : `Opening ${cmd}...`);
         window.open(url, "_blank");
       } else if (cmd === "ls") {
         const files = Object.keys(virtualFiles).join("   ");
@@ -430,10 +512,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function initTerminal() {
       const lang = document.body.getAttribute("lang") || "en";
-      const welcome =
-        lang === "vi"
-          ? "Gõ 'help' để xem các lệnh. Thử gõ 'ls'!"
-          : "Type 'help' for commands. Try typing 'ls'!";
+      const welcome = lang === "vi"
+        ? "=== Chào mừng đến Portfolio Terminal! ===\n\nGõ 'help' để xem các lệnh. Thử gõ 'ls'!"
+        : "=== Welcome to Portfolio Terminal! ===\n\nType 'help' for commands. Try typing 'ls'!";
       appendOutput(welcome);
     }
 
@@ -447,6 +528,22 @@ document.addEventListener("DOMContentLoaded", () => {
         e.preventDefault();
         executeCommand(terminalInput.value);
         terminalInput.value = "";
+        historyIndex = commandHistory.length;
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        if (commandHistory.length > 0) {
+          historyIndex = Math.max(0, historyIndex - 1);
+          terminalInput.value = commandHistory[historyIndex] || "";
+        }
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        if (historyIndex < commandHistory.length - 1) {
+          historyIndex = Math.min(commandHistory.length - 1, historyIndex + 1);
+          terminalInput.value = commandHistory[historyIndex] || "";
+        } else {
+          historyIndex = commandHistory.length;
+          terminalInput.value = "";
+        }
       }
     });
 
@@ -480,7 +577,7 @@ document.addEventListener("DOMContentLoaded", () => {
           if (clickedButtons.size === 3) {
             setTimeout(() => {
               if (terminalTitle) {
-                terminalTitle.textContent = "QisNgx@secretcode";
+                terminalTitle.textContent = "QisNgx@KonamiCode";
               }
               hintRevealed = true;
             }, 500);
@@ -501,18 +598,53 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const observerOptions = {
       root: null,
-      rootMargin: "-35% 0px -35% 0px",
-      threshold: 0,
+      rootMargin: "-20% 0px -60% 0px",
+      threshold: [0, 0.1, 0.5, 1],
     };
 
-    focusAndScrollSpyObserver = new IntersectionObserver((entries) => {
-      const focusedEntry = entries.find((entry) => entry.isIntersecting);
+    let currentActiveSection = null;
 
-      if (focusedEntry) {
+    focusAndScrollSpyObserver = new IntersectionObserver((entries) => {
+      const lang = document.body.getAttribute("lang") || "en";
+      
+      // Find the section with the highest intersection ratio
+      let maxRatio = 0;
+      let focusedEntry = null;
+
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio > maxRatio) {
+          maxRatio = entry.intersectionRatio;
+          focusedEntry = entry;
+        }
+      });
+
+      // Fallback: if no section is intersecting, find the closest one
+      if (!focusedEntry) {
+        const scrollY = window.scrollY + 100;
+        let closestSection = null;
+        let minDistance = Infinity;
+
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          const sectionTop = rect.top + window.scrollY;
+          const distance = Math.abs(sectionTop - scrollY);
+          
+          if (distance < minDistance && sectionTop <= scrollY + 200) {
+            minDistance = distance;
+            closestSection = section;
+          }
+        });
+
+        if (closestSection) {
+          focusedEntry = { target: closestSection, isIntersecting: true };
+        }
+      }
+
+      if (focusedEntry && focusedEntry.target !== currentActiveSection) {
+        currentActiveSection = focusedEntry.target;
         mainElement.classList.add("has-focus");
 
         const id = focusedEntry.target.getAttribute("id");
-        const lang = document.body.getAttribute("lang") || "en";
 
         sections.forEach((section) => {
           section.classList.toggle(
@@ -530,7 +662,7 @@ document.addEventListener("DOMContentLoaded", () => {
             link.classList.add("active");
           }
         });
-      } else {
+      } else if (!focusedEntry) {
         mainElement.classList.remove("has-focus");
         sections.forEach((section) => {
           section.classList.remove("is-focused");
@@ -543,6 +675,43 @@ document.addEventListener("DOMContentLoaded", () => {
         focusAndScrollSpyObserver.observe(sec);
       }
     });
+
+    // Scroll-based navigation update (throttled for performance)
+    let scrollTimeout;
+    let lastScrollNavUpdate = 0;
+    const navUpdateThrottle = 100; // Update nav every 100ms max
+    
+    window.addEventListener("scroll", () => {
+      const now = Date.now();
+      if (now - lastScrollNavUpdate < navUpdateThrottle) return;
+      
+      clearTimeout(scrollTimeout);
+      scrollTimeout = setTimeout(() => {
+        const scrollY = window.scrollY + 150;
+        let activeId = "hero";
+
+        sections.forEach((section) => {
+          const rect = section.getBoundingClientRect();
+          const sectionTop = rect.top + window.scrollY;
+          
+          if (sectionTop <= scrollY && sectionTop + rect.height > scrollY - 100) {
+            activeId = section.getAttribute("id") || "hero";
+          }
+        });
+
+        const lang = document.body.getAttribute("lang") || "en";
+        navLinks.forEach((link) => {
+          link.classList.remove("active");
+          if (
+            link.getAttribute("href") === `#${activeId}` &&
+            link.getAttribute("data-lang") === lang
+          ) {
+            link.classList.add("active");
+          }
+        });
+        lastScrollNavUpdate = Date.now();
+      }, 50);
+    }, { passive: true });
   }
   // SỬA LỖI: Trì hoãn việc khởi tạo Scroll Spy để tránh tự cuộn khi tải trang.
   setTimeout(initFocusAndScrollSpy, 1000);
@@ -580,51 +749,56 @@ document.addEventListener("DOMContentLoaded", () => {
       // THAY ĐỔI: Hàm incrementVote được chỉnh sửa để kích hoạt confetti từ nút được nhấn
       async function incrementVote(event) {
         const clickedButton = event.currentTarget;
-        // Vô hiệu hóa cả hai nút sau khi vote
-        if (upvoteButtonDesktop) upvoteButtonDesktop.disabled = true;
-        if (upvoteButtonMobile) upvoteButtonMobile.disabled = true;
+        const buttons = [upvoteButtonDesktop, upvoteButtonMobile].filter(Boolean);
+        
+        // Disable all buttons
+        buttons.forEach(btn => btn.disabled = true);
 
         try {
           await updateDoc(voteDocRef, {
             count: increment(1),
           });
 
-          localStorage.setItem("hasVotedPortfolio", "true");
-
+          localStorage.setItem(STORAGE_KEYS.hasVoted, "true");
           await getVoteCount();
 
+          // Confetti effect
           if (window.confetti && clickedButton) {
-            const rect = clickedButton.getBoundingClientRect();
-            const origin = {
-              x: (rect.left + rect.width / 2) / window.innerWidth,
-              y: (rect.top + rect.height / 2) / window.innerHeight,
-            };
-            confetti({
-              particleCount: 150,
-              spread: 90,
-              origin: origin,
-              colors: ["#00aaff", "#ffffff", "#0088cc"],
-            });
+            try {
+              const rect = clickedButton.getBoundingClientRect();
+              const origin = {
+                x: (rect.left + rect.width / 2) / window.innerWidth,
+                y: (rect.top + rect.height / 2) / window.innerHeight,
+              };
+              confetti({
+                particleCount: 150,
+                spread: 90,
+                origin: origin,
+                colors: ["#00aaff", "#ffffff", "#0088cc"],
+              });
+            } catch (confettiError) {
+              console.warn("Confetti error:", confettiError);
+            }
           }
-        } catch (e) {
-          console.error("Lỗi khi update vote: ", e);
-          // Bật lại các nút nếu có lỗi
-          if (upvoteButtonDesktop) upvoteButtonDesktop.disabled = false;
-          if (upvoteButtonMobile) upvoteButtonMobile.disabled = false;
-          localStorage.removeItem("hasVotedPortfolio");
+        } catch (error) {
+          console.error("Error updating vote:", error);
+          // Re-enable buttons on error
+          buttons.forEach(btn => btn.disabled = false);
+          localStorage.removeItem(STORAGE_KEYS.hasVoted);
         }
       }
 
       function checkVoteStatus() {
-        if (localStorage.getItem("hasVotedPortfolio") === "true") {
-          if (upvoteButtonDesktop) upvoteButtonDesktop.disabled = true;
-          if (upvoteButtonMobile) upvoteButtonMobile.disabled = true;
+        const hasVoted = localStorage.getItem(STORAGE_KEYS.hasVoted) === "true";
+        const buttons = [upvoteButtonDesktop, upvoteButtonMobile].filter(Boolean);
+        
+        if (hasVoted) {
+          buttons.forEach(btn => btn.disabled = true);
         } else {
-          // Gắn Event Listener cho cả hai nút
-          if (upvoteButtonDesktop)
-            upvoteButtonDesktop.addEventListener("click", incrementVote);
-          if (upvoteButtonMobile)
-            upvoteButtonMobile.addEventListener("click", incrementVote);
+          buttons.forEach(btn => {
+            btn.disabled = false;
+            btn.addEventListener("click", incrementVote);
+          });
         }
       }
 
@@ -637,65 +811,470 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }, 500);
 
-  const magneticButtons = document.querySelectorAll(".magnetic-btn");
-  const magneticStrength = 0.4;
+  // ===== MAGNETIC BUTTONS (Removed for performance) =====
+  // Magnetic button effects removed to improve performance
 
-  magneticButtons.forEach((btn) => {
-    btn.addEventListener("mousemove", (e) => {
-      const rect = btn.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-
-      btn.style.transform = `translate(${x * magneticStrength}px, ${
-        y * magneticStrength
-      }px)`;
-    });
-
-    btn.addEventListener("mouseleave", () => {
-      btn.style.transform = "translate(0, 0)";
-    });
-  });
-
-  const hoverElements = document.querySelectorAll(
-    "a, button, .project-card, .skill-tag"
-  );
-  hoverElements.forEach((el) => {
-    el.addEventListener("mouseenter", () => {
-      if (cursorOutline) cursorOutline.classList.add("cursor-hover");
-    });
-    el.addEventListener("mouseleave", () => {
-      if (cursorOutline) cursorOutline.classList.remove("cursor-hover");
-    });
-  });
+  // ===== CURSOR HOVER EFFECTS (Removed for performance) =====
+  // Cursor hover effects removed since custom cursor is disabled
+  // ===== IMAGE PROTECTION =====
   const portraitImage = document.querySelector(".about-image-container img");
-
   if (portraitImage) {
     portraitImage.addEventListener("contextmenu", (e) => {
       e.preventDefault();
     });
   }
+  // ===== ENHANCED KONAMI CODE =====
   function initKonamiCode() {
-    const konamiCode = ["q", "i", "s", "n", "g", "x"];
     let konamiPosition = 0;
+    let konamiTimeout = null;
+    let konamiIndicator = null;
+
+    // Create visual indicator
+    function createIndicator() {
+      if (konamiIndicator) return konamiIndicator;
+      
+      konamiIndicator = document.createElement("div");
+      konamiIndicator.id = "konami-indicator";
+      konamiIndicator.style.cssText = `
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: rgba(0, 0, 0, 0.9);
+        border: 2px solid var(--accent-primary);
+        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        z-index: 10001;
+        font-family: 'Roboto Mono', monospace;
+        font-size: 0.9rem;
+        color: var(--accent-primary);
+        box-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.3s ease;
+        pointer-events: none;
+      `;
+      document.body.appendChild(konamiIndicator);
+      return konamiIndicator;
+    }
+
+    function showIndicator(progress) {
+      const indicator = createIndicator();
+      const progressBar = progress.map((_, i) => 
+        i < konamiPosition ? '█' : '░'
+      ).join('');
+      indicator.textContent = `Konami: ${progressBar} (${konamiPosition}/${KONAMI_CODE.length})`;
+      indicator.style.opacity = '1';
+      indicator.style.transform = 'translateY(0)';
+      
+      // Pulse effect
+      indicator.style.animation = 'pulse 0.5s ease';
+      
+      clearTimeout(konamiTimeout);
+      konamiTimeout = setTimeout(() => {
+        if (indicator) {
+          indicator.style.opacity = '0';
+          indicator.style.transform = 'translateY(20px)';
+        }
+      }, 2000);
+    }
+
+    function hideIndicator() {
+      if (konamiIndicator) {
+        konamiIndicator.style.opacity = '0';
+        konamiIndicator.style.transform = 'translateY(20px)';
+      }
+    }
+
+    function activateRainbowMode() {
+      // Check if rainbow mode is currently active BEFORE toggling
+      const isCurrentlyActive = body.classList.contains("rainbow-mode");
+      
+      toggleRainbowMode();
+      
+      // Confetti removed for performance
+
+      // Show success notification
+      const notification = document.createElement("div");
+      notification.style.cssText = `
+        position: fixed;
+        top: 100px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(135deg, rgba(0, 245, 255, 0.95), rgba(0, 212, 230, 0.95));
+        color: #000;
+        padding: 1.5rem 2.5rem;
+        border-radius: 15px;
+        font-weight: 700;
+        font-size: 1.2rem;
+        z-index: 10002;
+        box-shadow: 0 0 40px rgba(0, 245, 255, 0.8);
+        animation: slideDown 0.5s ease;
+      `;
+      
+      // Show different message based on current state
+      if (isCurrentlyActive) {
+        notification.textContent = "🌈 RAINBOW MODE DEACTIVATED! 🌈";
+      } else {
+        notification.textContent = "🌈 RAINBOW MODE ACTIVATED! 🌈";
+      }
+      
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = 'slideUp 0.5s ease';
+        setTimeout(() => notification.remove(), 500);
+      }, 3000);
+    }
 
     document.addEventListener("keydown", (e) => {
-      // FIX: Ngăn xung đột giữa Terminal và Konami Code
-      if (document.activeElement.id === "terminal-input") {
+      // Prevent conflict with terminal input
+      if (document.activeElement?.id === "terminal-input") {
         return;
       }
-      // Hết FIX
 
-      if (e.key.toLowerCase() === konamiCode[konamiPosition]) {
+      const key = e.key?.toLowerCase();
+      if (key === KONAMI_CODE[konamiPosition]) {
         konamiPosition++;
-        if (konamiPosition === konamiCode.length) {
-          document.body.classList.toggle("rainbow-mode");
-          runConfetti(); // KÍCH HOẠT CONFETTI
+        showIndicator(KONAMI_CODE);
+        
+        if (konamiPosition === KONAMI_CODE.length) {
+          activateRainbowMode();
           konamiPosition = 0;
+          hideIndicator();
         }
-      } else {
+      } else if (key.length === 1) {
+        // Reset on any other key
         konamiPosition = 0;
+        hideIndicator();
       }
     });
   }
+  
   initKonamiCode();
+
+  // ===== SMOOTH SCROLL ENHANCEMENT =====
+  document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+    anchor.addEventListener("click", function (e) {
+      const href = this.getAttribute("href");
+      if (href === "#" || href === "") return;
+      
+      const target = document.querySelector(href);
+      if (target) {
+        e.preventDefault();
+        const offsetTop = target.offsetTop - 88; // Account for navbar height
+        window.scrollTo({
+          top: offsetTop,
+          behavior: "smooth"
+        });
+      }
+    });
+  });
+
+  // ===== ENHANCED PROJECT CARDS ANIMATION =====
+  const allProjectCards = document.querySelectorAll(".project-card");
+  allProjectCards.forEach((card, index) => {
+    card.style.animationDelay = `${index * 0.1}s`;
+  });
+
+  // ===== PARALLAX EFFECT (Removed for performance) =====
+  // Parallax effect removed to reduce scroll-related lag
+
+  // ===== COPY EMAIL =====
+  const copyEmailBtn = document.getElementById("copy-email");
+  const emailLink = document.getElementById("email-link");
+  const copyFeedback = document.getElementById("copy-email-feedback");
+  
+  if (copyEmailBtn && emailLink && copyFeedback) {
+    copyEmailBtn.addEventListener("click", async () => {
+      const email = emailLink.textContent;
+      try {
+        await navigator.clipboard.writeText(email);
+        copyFeedback.style.display = "inline";
+        copyEmailBtn.style.opacity = "0.5";
+        setTimeout(() => {
+          copyFeedback.style.display = "none";
+          copyEmailBtn.style.opacity = "1";
+        }, 2000);
+      } catch (err) {
+        const textArea = document.createElement("textarea");
+        textArea.value = email;
+        textArea.style.position = "fixed";
+        textArea.style.opacity = "0";
+        document.body.appendChild(textArea);
+        textArea.select();
+        try {
+          document.execCommand("copy");
+          copyFeedback.style.display = "inline";
+          copyEmailBtn.style.opacity = "0.5";
+          setTimeout(() => {
+            copyFeedback.style.display = "none";
+            copyEmailBtn.style.opacity = "1";
+          }, 2000);
+        } catch (err) {
+          console.error("Failed to copy email:", err);
+        }
+        document.body.removeChild(textArea);
+      }
+    });
+  }
+
+  // ===== KEYBOARD SHORTCUTS (Removed) =====
+  // Keyboard navigation removed as requested
+
+  // ===== ANIMATE SKILL PROGRESS BARS =====
+  function animateSkillBars() {
+    const progressBars = document.querySelectorAll(".skill-progress-fill");
+    const skillObserver = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const progressBar = entry.target;
+            const progress = parseInt(progressBar.getAttribute("data-progress") || "0");
+            progressBar.style.width = `${progress}%`;
+            skillObserver.unobserve(progressBar);
+          }
+        });
+      },
+      {
+        threshold: 0.5,
+      }
+    );
+
+    progressBars.forEach((bar) => {
+      skillObserver.observe(bar);
+    });
+  }
+
+  animateSkillBars();
+
+  // ===== SKILL NAVIGATION =====
+  // Function is now defined globally before DOMContentLoaded
+  // No need to redefine it here
+
+  // ===== INTERACTIVE SKILL RADAR CHART =====
+  const toggleSkillView = document.getElementById("toggle-skill-view");
+  const skillRadarContainer = document.getElementById("skill-radar-container");
+  const skillCardsView = document.getElementById("skill-cards-view");
+  const radarChart = document.getElementById("skill-radar-chart");
+
+  let isRadarView = false;
+
+  const skillData = {
+    labels: ["OOP", "DSA", "SQL", "Java", "JSP", "HTML", "CSS", "JS"],
+    current: [70, 65, 60, 65, 55, 70, 65, 60],
+    target: [95, 90, 85, 90, 85, 90, 85, 85]
+  };
+
+  function drawRadarChart() {
+    if (!radarChart) return;
+    
+    const ctx = radarChart.getContext("2d");
+    const centerX = radarChart.width / 2;
+    const centerY = radarChart.height / 2;
+    const radius = Math.min(centerX, centerY) - 40;
+    const numPoints = skillData.labels.length;
+    const angleStep = (Math.PI * 2) / numPoints;
+
+    ctx.clearRect(0, 0, radarChart.width, radarChart.height);
+
+    // Draw grid circles (reduced from 5 to 3 for performance)
+    for (let i = 1; i <= 3; i++) {
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, (radius * i) / 3, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(0, 245, 255, ${0.15 + i * 0.1})`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+    }
+
+    // Draw grid lines
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const x = centerX + Math.cos(angle) * radius;
+      const y = centerY + Math.sin(angle) * radius;
+      
+      ctx.beginPath();
+      ctx.moveTo(centerX, centerY);
+      ctx.lineTo(x, y);
+      ctx.strokeStyle = `rgba(0, 245, 255, 0.2)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
+
+      // Draw labels
+      const labelX = centerX + Math.cos(angle) * (radius + 20);
+      const labelY = centerY + Math.sin(angle) * (radius + 20);
+      ctx.fillStyle = "var(--bs-body-color)";
+      ctx.font = "12px 'Inter', sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText(skillData.labels[i], labelX, labelY);
+    }
+
+    // Draw target area
+    ctx.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const value = skillData.target[i];
+      const r = (radius * value) / 100;
+      const x = centerX + Math.cos(angle) * r;
+      const y = centerY + Math.sin(angle) * r;
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.closePath();
+    ctx.fillStyle = "rgba(0, 153, 179, 0.2)";
+    ctx.fill();
+    ctx.strokeStyle = "var(--accent-tertiary)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw current area
+    ctx.beginPath();
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const value = skillData.current[i];
+      const r = (radius * value) / 100;
+      const x = centerX + Math.cos(angle) * r;
+      const y = centerY + Math.sin(angle) * r;
+      
+      if (i === 0) {
+        ctx.moveTo(x, y);
+      } else {
+        ctx.lineTo(x, y);
+      }
+    }
+    ctx.closePath();
+    ctx.fillStyle = "rgba(0, 245, 255, 0.3)";
+    ctx.fill();
+    ctx.strokeStyle = "var(--accent-primary)";
+    ctx.lineWidth = 2;
+    ctx.stroke();
+
+    // Draw points (simplified for performance)
+    for (let i = 0; i < numPoints; i++) {
+      const angle = i * angleStep - Math.PI / 2;
+      const value = skillData.current[i];
+      const r = (radius * value) / 100;
+      const x = centerX + Math.cos(angle) * r;
+      const y = centerY + Math.sin(angle) * r;
+      
+      ctx.beginPath();
+      ctx.arc(x, y, 3, 0, Math.PI * 2);
+      ctx.fillStyle = "var(--accent-primary)";
+      ctx.fill();
+    }
+  }
+
+  function resizeRadarChart() {
+    if (!radarChart) return;
+    const container = skillRadarContainer;
+    if (container) {
+      radarChart.width = container.offsetWidth;
+      radarChart.height = 500;
+      drawRadarChart();
+    }
+  }
+
+  if (toggleSkillView && skillRadarContainer && skillCardsView) {
+    toggleSkillView.addEventListener("click", () => {
+      isRadarView = !isRadarView;
+      
+      if (isRadarView) {
+        skillRadarContainer.style.display = "block";
+        skillCardsView.style.display = "none";
+        toggleSkillView.innerHTML = '<span data-lang="en">📋 Cards View</span><span data-lang="vi">📋 Xem thẻ</span>';
+        setTimeout(() => {
+          resizeRadarChart();
+          drawRadarChart();
+        }, 100);
+      } else {
+        skillRadarContainer.style.display = "none";
+        skillCardsView.style.display = "flex";
+        toggleSkillView.innerHTML = '<span data-lang="en">📊 Radar Chart</span><span data-lang="vi">📊 Biểu đồ</span>';
+      }
+    });
+
+    // Throttle resize handler for performance
+    let resizeTimeout;
+    window.addEventListener("resize", () => {
+      if (isRadarView) {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+          resizeRadarChart();
+          drawRadarChart();
+        }, 150);
+      }
+    }, { passive: true });
+  }
+
+  // ===== INTERACTIVE PROJECT SEARCH =====
+  const projectSearch = document.getElementById("project-search");
+  const projectsContainer = document.getElementById("projects-container");
+  
+  if (projectSearch && projectsContainer) {
+    const projectCards = Array.from(projectsContainer.querySelectorAll(".project-card"));
+    
+    function updatePlaceholder() {
+      const lang = body.getAttribute("lang");
+      const placeholder = projectSearch.getAttribute(
+        lang === "vi" ? "data-lang-placeholder-vi" : "data-lang-placeholder-en"
+      );
+      projectSearch.placeholder = placeholder || "Search projects...";
+    }
+    
+    updatePlaceholder();
+    
+    projectSearch.addEventListener("input", (e) => {
+      const searchTerm = e.target.value.toLowerCase().trim();
+      
+      projectCards.forEach((card) => {
+        const cardText = card.textContent.toLowerCase();
+        const cardElement = card.closest(".col-lg-6") || card.parentElement;
+        
+        if (searchTerm === "" || cardText.includes(searchTerm)) {
+          cardElement.style.display = "";
+          card.style.opacity = "1";
+          card.style.transform = "scale(1)";
+        } else {
+          cardElement.style.display = "none";
+        }
+      });
+
+      // Show "no results" message if needed
+      const visibleCards = projectCards.filter((card) => {
+        const cardElement = card.closest(".col-lg-6") || card.parentElement;
+        return cardElement.style.display !== "none";
+      });
+
+      let noResultsMsg = projectsContainer.querySelector(".no-results");
+      if (visibleCards.length === 0 && searchTerm !== "") {
+        if (!noResultsMsg) {
+          noResultsMsg = document.createElement("div");
+          noResultsMsg.className = "no-results text-center col-12 mt-5";
+          noResultsMsg.innerHTML = `
+            <p class="text-muted" data-lang="en">No projects found matching "${searchTerm}"</p>
+            <p class="text-muted" data-lang="vi">Không tìm thấy dự án nào khớp với "${searchTerm}"</p>
+          `;
+          projectsContainer.appendChild(noResultsMsg);
+        }
+      } else if (noResultsMsg) {
+        noResultsMsg.remove();
+      }
+    });
+
+    // Update placeholder on language change
+    const langObserver = new MutationObserver(() => {
+      updatePlaceholder();
+    });
+    langObserver.observe(body, { attributes: true, attributeFilter: ["lang"] });
+  }
+
+  // ===== INTERACTIVE CARD CLICK EFFECTS (Removed for performance) =====
+  // Ripple effects removed to improve performance
+
+  // ===== INTERACTIVE SKILL TAG CLICK (Removed for performance) =====
+  // Skill tag click effects removed to improve performance
 });
