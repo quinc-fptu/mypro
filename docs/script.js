@@ -1,26 +1,472 @@
-document.addEventListener("DOMContentLoaded", () => {
-  // ===== LOADING SCREEN =====
-  const loadingScreen = document.getElementById("loading-screen");
+// ===== CYBER LOADING SCREEN - Simplified and reliable =====
+(function() {
+  'use strict';
   
-  function hideLoadingScreen() {
-    if (loadingScreen) {
-      loadingScreen.classList.add("hidden");
-      setTimeout(() => {
-        if (loadingScreen.parentNode) {
-          loadingScreen.style.display = "none";
-        }
-      }, 500);
+  // DEBUG MODE: Set to true to pause loading screen for inspection
+  const DEBUG_MODE = false; // Set to false to re-enable auto-hide
+  // PAUSE_AT_TRANSITION: Set to true to pause at transition effect (lock mechanism) for inspection
+  const PAUSE_AT_TRANSITION = false; // Set to false to allow full transition
+  
+  const loadingSteps = [
+    { text: { en: "Connecting to server...", vi: "Đang kết nối server..." }, progress: 15 },
+    { text: { en: "Loading assets...", vi: "Đang tải tài nguyên..." }, progress: 35 },
+    { text: { en: "Initializing components...", vi: "Đang khởi tạo component..." }, progress: 55 },
+    { text: { en: "Building interface...", vi: "Đang xây dựng giao diện..." }, progress: 75 },
+    { text: { en: "Optimizing performance...", vi: "Đang tối ưu hiệu suất..." }, progress: 90 },
+    { text: { en: "System ready!", vi: "Hệ thống sẵn sàng!" }, progress: 100 }
+  ];
+  
+  let currentStep = 0;
+  let currentProgress = 0;
+  let loadingHidden = false;
+  const MIN_DISPLAY_TIME_MS = 3500; // Minimum 3.5 seconds
+  const MIN_PROGRESS_SPEED = 0.2; // Minimum progress increment
+  const MAX_PROGRESS_SPEED = 0.8; // Maximum progress increment
+  const startTime = window.__LOADING_START_TIME__ || Date.now();
+  
+  // Random progress speed function
+  function getRandomProgressSpeed() {
+    return MIN_PROGRESS_SPEED + Math.random() * (MAX_PROGRESS_SPEED - MIN_PROGRESS_SPEED);
+  }
+  
+  function getCurrentLang() {
+    try {
+      return document.body ? document.body.getAttribute("lang") || "en" : "en";
+    } catch(e) {
+      return "en";
     }
   }
-
-  // Hide loading screen when page is fully loaded
-  if (document.readyState === "complete") {
-    setTimeout(hideLoadingScreen, 300);
-  } else {
-    window.addEventListener("load", () => {
-      setTimeout(hideLoadingScreen, 300);
-    });
+  
+  function updateLoadingStep() {
+    if (loadingHidden) return;
+    
+    const loadingProgressBar = document.getElementById("loading-progress-bar");
+    const loadingProgressPercent = document.getElementById("loading-percent");
+    const loadingStatus = document.getElementById("loading-status");
+    
+    // Check if we have all required elements
+    if (!loadingProgressBar || !loadingProgressPercent || !loadingStatus) {
+      console.warn("Loading screen elements not found");
+      return;
+    }
+    
+    // Continuous animation from current progress to 100%
+    const animateProgress = () => {
+      if (loadingHidden) return;
+      
+      // Check if we've passed any step thresholds and update status text
+      for (let i = loadingSteps.length - 1; i >= 0; i--) {
+        if (currentProgress >= loadingSteps[i].progress && currentStep <= i) {
+          currentStep = i;
+          const lang = getCurrentLang();
+          loadingStatus.textContent = loadingSteps[i].text[lang] || loadingSteps[i].text.en;
+          console.log("Status updated at", loadingSteps[i].progress + "%:", loadingStatus.textContent);
+          break;
+        }
+      }
+      
+      // Continue animating if not at 100%
+      if (currentProgress < 100) {
+        // Random progress increment for natural variation
+        const randomSpeed = getRandomProgressSpeed();
+        // Occasionally add small bursts (10% chance)
+        const speedMultiplier = Math.random() < 0.1 ? 1.5 + Math.random() * 0.5 : 1.0;
+        const progressIncrement = randomSpeed * speedMultiplier;
+        
+        currentProgress += progressIncrement;
+        
+        // Ensure we don't exceed 100%
+        if (currentProgress > 100) {
+          currentProgress = 100;
+        }
+        
+        loadingProgressBar.style.width = currentProgress + "%";
+        loadingProgressPercent.textContent = Math.round(currentProgress) + "%";
+        
+        // Random delay between frames for more natural animation (10-25ms)
+        const frameDelay = 10 + Math.random() * 15;
+        setTimeout(() => {
+          if (!loadingHidden) {
+            requestAnimationFrame(animateProgress);
+          }
+        }, frameDelay);
+      } else {
+        // Reached 100%
+        currentProgress = 100;
+        loadingProgressBar.style.width = "100%";
+        loadingProgressPercent.textContent = "100%";
+        
+        // Ensure final status is shown
+        const finalStep = loadingSteps[loadingSteps.length - 1];
+        const finalLang = getCurrentLang();
+        if (loadingStatus) {
+          loadingStatus.textContent = finalStep.text[finalLang] || finalStep.text.en;
+        }
+        
+        console.log("Progress reached 100%, final status:", loadingStatus.textContent);
+        
+        // Wait to show final status, then hide
+        const elapsed = Date.now() - startTime;
+        const remainingTime = Math.max(0, MIN_DISPLAY_TIME_MS - elapsed);
+        const finalDelay = Math.max(1000, Math.min(2000, remainingTime + 500));
+        
+        console.log("Step 6 completed! Elapsed:", elapsed, "ms, Remaining:", remainingTime, "ms, Will hide in:", finalDelay, "ms");
+        
+        // Use a named function to ensure it executes
+        const hideAfterDelay = function() {
+          console.log("hideAfterDelay called, loadingHidden:", loadingHidden);
+          if (DEBUG_MODE) {
+            console.log("DEBUG_MODE is ON - Loading screen will NOT auto-hide. Press F12 and type: window.skipLoadingScreen() to manually hide it.");
+            return; // Don't hide in debug mode
+          }
+          if (!loadingHidden) {
+            console.log("Calling hideLoadingScreen() now");
+            hideLoadingScreen();
+          } else {
+            console.log("Loading screen already hidden, not calling hideLoadingScreen");
+          }
+        };
+        
+        if (!DEBUG_MODE) {
+          setTimeout(hideAfterDelay, finalDelay);
+          
+          // Also set a backup timeout just in case
+          setTimeout(function() {
+            console.log("Backup timeout fired");
+            if (DEBUG_MODE) {
+              console.log("DEBUG_MODE is ON - Skipping backup hide");
+              return;
+            }
+            if (!loadingHidden) {
+              console.log("Backup: Force calling hideLoadingScreen()");
+              hideLoadingScreen();
+            }
+          }, finalDelay + 1000);
+        } else {
+          console.log("DEBUG_MODE: Loading screen will stay visible. Use window.skipLoadingScreen() in console to hide it manually.");
+        }
+      }
+    };
+    
+    // Start continuous animation
+    animateProgress();
   }
+  
+  function hideLoadingScreen() {
+    console.log("hideLoadingScreen: Function called, loadingHidden:", loadingHidden);
+    
+    if (loadingHidden) {
+      console.log("hideLoadingScreen: Already hidden, returning");
+      return;
+    }
+    
+    // Don't set loadingHidden = true if pausing at transition (allows skip button to still work)
+    if (!PAUSE_AT_TRANSITION) {
+      console.log("hideLoadingScreen: Setting loadingHidden = true");
+      loadingHidden = true;
+    } else {
+      console.log("hideLoadingScreen: PAUSE_AT_TRANSITION is ON - keeping loadingHidden = false to allow skip");
+    }
+    
+    const loadingScreen = document.getElementById("loading-screen");
+    const loadingProgressBar = document.getElementById("loading-progress-bar");
+    const loadingProgressPercent = document.getElementById("loading-percent");
+    const loadingStatus = document.getElementById("loading-status");
+    
+    console.log("hideLoadingScreen: Elements found - screen:", !!loadingScreen, "bar:", !!loadingProgressBar, "percent:", !!loadingProgressPercent, "status:", !!loadingStatus);
+    
+    // Ensure final status is shown
+    if (loadingStatus) {
+      const finalStep = loadingSteps[loadingSteps.length - 1];
+      const lang = getCurrentLang();
+      loadingStatus.textContent = finalStep.text[lang] || finalStep.text.en;
+    }
+    
+    // Ensure progress is 100%
+    if (loadingProgressBar) {
+      loadingProgressBar.style.width = "100%";
+    }
+    if (loadingProgressPercent) {
+      loadingProgressPercent.textContent = "100%";
+    }
+    
+    if (!loadingScreen) {
+      // If no loading screen, just unlock body
+      console.log("hideLoadingScreen: No loading screen element found, unlocking body only");
+      try {
+        document.body.style.overflow = '';
+        document.body.classList.add('loaded');
+        console.log("hideLoadingScreen: Body unlocked");
+      } catch(e) {
+        console.error("hideLoadingScreen: Error unlocking body", e);
+      }
+      return;
+    }
+    
+    console.log("hideLoadingScreen: Starting hide process for loading screen");
+    
+    // Unlock body first (allow scrolling)
+    try {
+      document.body.style.overflow = '';
+      console.log("hideLoadingScreen: Body unlocked");
+    } catch(e) {
+      console.error("hideLoadingScreen: Error unlocking body", e);
+    }
+    
+    // Start fade out animation
+    try {
+      // Step 1: Add fade-out class to trigger CSS transition
+      loadingScreen.classList.add("fade-out");
+      console.log("hideLoadingScreen: Added 'fade-out' class, starting animation");
+      
+      // PAUSE_AT_TRANSITION: Stop here to inspect transition effect
+      if (PAUSE_AT_TRANSITION) {
+        console.log("========================================");
+        console.log("PAUSE_AT_TRANSITION is ON");
+        console.log("Transition effect is now active. Simple fade out effect should be visible.");
+        console.log("Animation will pause in the middle for inspection.");
+        console.log("========================================");
+        
+        // Pause animation in the middle (at 50% of 1.5s = 750ms)
+        setTimeout(() => {
+          loadingScreen.classList.add("pause-animation");
+          console.log("========================================");
+          console.log("ANIMATION PAUSED at 50% (750ms)");
+          console.log("You can now inspect the transition effect in DevTools.");
+          console.log("Simple fade out effect should be visible and paused.");
+          console.log("========================================");
+          console.log("To resume animation: window.resumeAnimation()");
+          console.log("To continue hiding: window.completeHideLoadingScreen()");
+          console.log("Or click the SKIP button to restart and hide normally");
+        }, 750); // Pause at 750ms (middle of 1.5s animation)
+        
+        // Don't continue with hiding - pause at transition
+        return;
+      }
+      
+      // Step 2: Show main content after lock mechanism starts (sync with animation)
+      setTimeout(() => {
+        try {
+          document.body.classList.add('loaded');
+          console.log("hideLoadingScreen: Added 'loaded' class to body");
+        } catch(e) {
+          console.error("hideLoadingScreen: Error adding loaded class", e);
+        }
+      }, 400);
+      
+      // Step 3: Force hide immediately, then remove from DOM after animation
+      setTimeout(() => {
+        try {
+    if (loadingScreen) {
+            // Force hide immediately
+            loadingScreen.style.display = 'none';
+            loadingScreen.style.opacity = '0';
+            loadingScreen.style.visibility = 'hidden';
+            loadingScreen.style.zIndex = '-9999';
+      loadingScreen.classList.add("hidden");
+            console.log("hideLoadingScreen: Force hidden loading screen");
+            
+            // Remove from DOM after a brief moment
+      setTimeout(() => {
+              try {
+                if (loadingScreen && loadingScreen.parentNode) {
+                  loadingScreen.parentNode.removeChild(loadingScreen);
+                  console.log("hideLoadingScreen: Loading screen removed from DOM");
+                }
+              } catch(e) {
+                console.error("hideLoadingScreen: Error removing from DOM", e);
+        }
+            }, 200);
+    }
+        } catch(e) {
+          console.error("hideLoadingScreen: Error in cleanup", e);
+        }
+      }, 1500); // Wait for animation (1500ms - simple fade out)
+      
+      console.log("hideLoadingScreen: Fade out animation started");
+    } catch(e) {
+      console.error("hideLoadingScreen: Error during fade out", e);
+      // Fallback: remove immediately if animation fails
+      try {
+        document.body.classList.add('loaded');
+        if (loadingScreen && loadingScreen.parentNode) {
+          loadingScreen.parentNode.removeChild(loadingScreen);
+          console.log("hideLoadingScreen: Fallback - removed from DOM");
+        }
+      } catch(e2) {
+        console.error("hideLoadingScreen: Fallback failed", e2);
+      }
+    }
+  }
+  
+  function startLoadingAnimation() {
+    const loadingProgressBar = document.getElementById("loading-progress-bar");
+    const loadingProgressPercent = document.getElementById("loading-percent");
+    
+    if (loadingProgressBar && loadingProgressPercent && !loadingHidden) {
+      updateLoadingStep();
+    }
+  }
+  
+  function setupLoadingScreen() {
+    // Lock body scroll
+    try {
+      if (document.body) {
+        document.body.style.overflow = 'hidden';
+      }
+    } catch(e) {}
+    
+    // Start animation when DOM is ready
+    function initAnimation() {
+      if (!loadingHidden) {
+        console.log("Starting loading animation");
+        startLoadingAnimation();
+      }
+    }
+    
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAnimation);
+  } else {
+      initAnimation();
+    }
+    
+    // Fallback: Hide after absolute maximum time (10 seconds)
+    // This ensures loading screen never gets stuck
+    if (!DEBUG_MODE) {
+      setTimeout(function() {
+        if (!loadingHidden) {
+          console.log("Fallback: Hiding loading screen after max time");
+          hideLoadingScreen();
+        }
+      }, 10000);
+    } else {
+      console.log("DEBUG_MODE: Fallback timeout disabled - loading screen will stay visible");
+    }
+  }
+  
+  // Resume animation - Global function
+  window.resumeAnimation = function() {
+    console.log("resumeAnimation: Resuming animation");
+    const loadingScreen = document.getElementById("loading-screen");
+    if (!loadingScreen) {
+      console.log("resumeAnimation: Loading screen not found");
+      return;
+    }
+    loadingScreen.classList.remove("pause-animation");
+    console.log("resumeAnimation: Animation resumed");
+  };
+  
+  // Complete hide loading screen after transition pause - Global function
+  window.completeHideLoadingScreen = function() {
+    console.log("completeHideLoadingScreen: Completing hide process after transition pause");
+    loadingHidden = true; // Mark as hidden to prevent duplicate calls
+    const loadingScreen = document.getElementById("loading-screen");
+    if (!loadingScreen) {
+      console.log("completeHideLoadingScreen: Loading screen not found");
+      return;
+    }
+    
+    // Check if animation is paused
+    const isPaused = loadingScreen.classList.contains("pause-animation");
+    const remainingAnimationTime = isPaused ? 750 : 0; // If paused at 750ms, 750ms remaining (1.5s - 750ms)
+    
+    // Remove pause class to resume animation
+    if (isPaused) {
+      loadingScreen.classList.remove("pause-animation");
+      console.log("completeHideLoadingScreen: Animation resumed, remaining time:", remainingAnimationTime + "ms");
+    }
+    
+    // Show main content immediately (or after a short delay if animation just resumed)
+    setTimeout(() => {
+      try {
+        document.body.classList.add('loaded');
+        console.log("completeHideLoadingScreen: Added 'loaded' class to body");
+      } catch(e) {
+        console.error("completeHideLoadingScreen: Error adding loaded class", e);
+      }
+    }, Math.min(400, remainingAnimationTime / 2));
+    
+    // Wait for animation to complete, then force hide and remove from DOM
+    setTimeout(() => {
+      try {
+        if (loadingScreen) {
+          // Force hide immediately
+          loadingScreen.style.display = 'none';
+          loadingScreen.style.opacity = '0';
+          loadingScreen.style.visibility = 'hidden';
+          loadingScreen.style.zIndex = '-9999';
+          loadingScreen.classList.add("hidden");
+          console.log("completeHideLoadingScreen: Force hidden loading screen");
+          
+          // Remove from DOM after a brief moment
+          setTimeout(() => {
+            try {
+              if (loadingScreen && loadingScreen.parentNode) {
+                loadingScreen.parentNode.removeChild(loadingScreen);
+                console.log("completeHideLoadingScreen: Loading screen removed from DOM");
+              }
+            } catch(e) {
+              console.error("completeHideLoadingScreen: Error removing from DOM", e);
+            }
+          }, 200);
+        }
+      } catch(e) {
+        console.error("completeHideLoadingScreen: Error in cleanup", e);
+      }
+    }, Math.max(remainingAnimationTime, 1500) + 100); // Wait for remaining animation time (min 1.5s) + buffer
+  };
+  
+  // Skip loading screen function - Global
+  window.skipLoadingScreen = function() {
+    console.log("skipLoadingScreen: Skip button clicked");
+    if (!loadingHidden) {
+      // Force progress to 100%
+      currentProgress = 100;
+      const loadingProgressBar = document.getElementById("loading-progress-bar");
+      const loadingProgressPercent = document.getElementById("loading-percent");
+      if (loadingProgressBar) {
+        loadingProgressBar.style.width = "100%";
+      }
+      if (loadingProgressPercent) {
+        loadingProgressPercent.textContent = "100%";
+      }
+      
+      // Update final status
+      const loadingStatus = document.getElementById("loading-status");
+      if (loadingStatus) {
+        const finalStep = loadingSteps[loadingSteps.length - 1];
+        const lang = getCurrentLang();
+        loadingStatus.textContent = finalStep.text[lang] || finalStep.text.en;
+      }
+      
+      // Hide immediately
+      setTimeout(function() {
+        hideLoadingScreen();
+      }, 300);
+    }
+  };
+  
+  // Initialize immediately
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupLoadingScreen);
+  } else {
+    setupLoadingScreen();
+  }
+  
+  // Extra safety: hide after absolute max time
+  if (!DEBUG_MODE) {
+    setTimeout(function() {
+      if (!loadingHidden) {
+        console.log("Extra safety: Hiding loading screen");
+        hideLoadingScreen();
+      }
+    }, 10000);
+  } else {
+    console.log("DEBUG_MODE: Extra safety timeout disabled");
+  }
+})();
+
+document.addEventListener("DOMContentLoaded", () => {
 
   // ===== CONSTANTS =====
   const KONAMI_CODE = ["q", "i", "s", "n", "g", "x"];
@@ -915,7 +1361,7 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isCurrentlyActive) {
         notification.textContent = "🌈 RAINBOW MODE DEACTIVATED! 🌈";
       } else {
-        notification.textContent = "🌈 RAINBOW MODE ACTIVATED! 🌈";
+      notification.textContent = "🌈 RAINBOW MODE ACTIVATED! 🌈";
       }
       
       document.body.appendChild(notification);
@@ -1203,8 +1649,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (isRadarView) {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
-          resizeRadarChart();
-          drawRadarChart();
+        resizeRadarChart();
+        drawRadarChart();
         }, 150);
       }
     }, { passive: true });
@@ -1278,3 +1724,4 @@ document.addEventListener("DOMContentLoaded", () => {
   // ===== INTERACTIVE SKILL TAG CLICK (Removed for performance) =====
   // Skill tag click effects removed to improve performance
 });
+
